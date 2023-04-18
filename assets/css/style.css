@@ -1,0 +1,38 @@
+:root {
+  --color-0: #eaeaea;
+  --color-1: #ff6600;
+  --color-2: #eec900;
+  --color-3: #0000ff;
+  --color-4: #cc00ff;
+  --color-5: #00ff00;
+  --color-6: #66ccff;
+  --color-7: #ff0000;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+main {
+    margin: 100px 0;
+    border: 3px solid black;
+    height: 75vh;
+    width: 50vw;
+    width: 600px;
+    height: 1080px;
+}
+
+section {
+    display: flex;
+    flex-direction: row;
+}
+
+div {
+    height: 58px;
+    width: 58px;
+    border: 1px solid grey;
+}
