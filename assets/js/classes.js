@@ -24,8 +24,6 @@ class Box {
 
     isTouching() {
 
-        console.log(this.y < 17);
-
         if (this.y < 17) {
             const nextRow = document.getElementById(`y${this.y + 1}`);
             const targetDiv = nextRow.children[this.x];
