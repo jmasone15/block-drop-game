@@ -1,12 +1,11 @@
 :root {
-  --color-0: #eaeaea;
-  --color-1: #ff6600;
-  --color-2: #eec900;
-  --color-3: #0000ff;
-  --color-4: #cc00ff;
-  --color-5: #00ff00;
-  --color-6: #66ccff;
-  --color-7: #ff0000;
+    --color-1: #ff0000;
+    --color-2: #ff6600;
+    --color-3: #eec900;
+    --color-4: #00ff00;
+    --color-5: #66ccff;
+    --color-6: #0000ff;
+    --color-7: #cc00ff;
 }
 
 
@@ -35,4 +34,32 @@ div {
     height: 58px;
     width: 58px;
     border: 1px solid grey;
+}
+
+.red {
+    background-color: var(--color-1);
+}
+
+.orange {
+    background-color: var(--color-2);
+}
+
+.yellow {
+    background-color: var(--color-3);
+}
+
+.green {
+    background-color: var(--color-4);
+}
+
+.light-blue {
+    background-color: var(--color-5);
+}
+
+.blue {
+    background-color: var(--color-6);
+}
+
+.magenta {
+    background-color: var(--color-7);
 }
