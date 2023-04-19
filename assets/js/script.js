@@ -10,7 +10,7 @@ const init = async () => {
 
 const game = async () => {
     activeShape = new L(5, 0);
-    activeShape.populateShape();
+    activeShape.populateShape(true);
 
     userInput = true
 }
