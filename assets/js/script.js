@@ -1,43 +1,5 @@
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// X goes from 0 - 9
-// Y goes from 0 - 17
-class Box {
-    constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-    }
-
-    targetDiv() {
-        const row = document.getElementById(`y${this.y}`);
-        return row.children[this.x]
-    }
-
-    updateDom(show) {
-        const div = this.targetDiv();
-
-        if (show) {
-            div.setAttribute("class", this.color);
-        } else {
-            div.removeAttribute("class");
-        }
-    }
-
-    async gravity() {
-        this.updateDom(true);
-
-        await delay(100)
-
-        while (this.y < 17) {
-            this.updateDom(false)
-            this.y++
-            this.updateDom(true)
-            await delay(50)
-        }
-    }
-}
-
 const populateGrid = async () => {
 
     await delay(1000)
@@ -55,8 +17,10 @@ const populateGrid = async () => {
         }
     }
 
-    const newBox = new Box(4, 0, "magenta");
-    await newBox.gravity();
+    const boxOne = new Box(4, 0, "magenta");
+    const boxTwo = new Box(4, 0, "blue");
+    await boxOne.gravity();
+    await boxTwo.gravity();
 }
 
 populateGrid();

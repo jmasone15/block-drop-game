@@ -36,6 +36,10 @@ div {
     border: 1px solid grey;
 }
 
+.active {
+    border-color: red;
+}
+
 .red {
     background-color: var(--color-1);
 }
