@@ -29,7 +29,7 @@ class Box {
             const targetDiv = nextRow.children[this.x];
             return targetDiv.classList.length > 0
         }
-        
+
         return true
     }
 
@@ -44,6 +44,87 @@ class Box {
             this.updateDom(true)
             await delay(50)
         }
-        
+
+    }
+}
+
+// L piece (light-blue) | O piece (yellow) | T piece (magenta) | S piece (green)
+// Z piece (red) | J piece (blue) | L piece (orange)
+class Shape {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    populateShape(show) {
+        for (let i = 0; i < this.boxes.length; i++) {
+            this.boxes[i].updateDom(show);
+        }
+    }
+
+    canShapeMove(direction) {
+        for (let i = 0; i < this.boxes.length; i++) {
+
+            switch (direction) {
+                case "ArrowLeft":
+                    if (this.boxes[i].x == 0) {
+                        return false
+                    }
+                    break;
+                case "ArrowRight":
+                    if (this.boxes[i].x == 9) {
+                        return false
+                    }
+                    break;
+                default:
+                    if (this.boxes[i].y == 17) {
+                        return false
+                    }
+                    break;
+            }
+        }
+
+        return true
+    }
+
+    moveShape(direction) {
+
+        if (!this.canShapeMove(direction)) {
+            return;
+        }
+
+        this.populateShape(false);
+
+        for (let i = 0; i < this.boxes.length; i++) {
+            switch (direction) {
+                case "ArrowLeft":
+                    this.boxes[i].x--
+                    break;
+                case "ArrowRight":
+                    this.boxes[i].x++
+                    break;
+                case "ArrowDown":
+                    this.boxes[i].y++
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        this.populateShape(true);
+    }
+}
+
+class L extends Shape {
+    constructor(x, y) {
+        super(x, y);
+        this.color = "light-blue";
+        this.focalBox = new Box(x, y, this.color);
+        this.boxes = [
+            new Box(x - 2, y, this.color),
+            new Box(x - 1, y, this.color),
+            this.focalBox,
+            new Box(x + 1, y, this.color)
+        ]
     }
 }

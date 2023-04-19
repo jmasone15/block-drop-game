@@ -1,4 +1,19 @@
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+let userInput = false;
+let activeShape;
+
+const init = async () => {
+    await populateGrid();
+
+    game();
+}
+
+const game = async () => {
+    activeShape = new L(5, 0);
+    activeShape.populateShape();
+
+    userInput = true
+}
 
 const populateGrid = async () => {
 
@@ -16,11 +31,14 @@ const populateGrid = async () => {
             await delay(10)
         }
     }
-
-    const boxOne = new Box(4, 0, "magenta");
-    const boxTwo = new Box(4, 0, "blue");
-    await boxOne.gravity();
-    await boxTwo.gravity();
 }
 
-populateGrid();
+document.addEventListener("keydown", ({ key }) => {
+    if (!userInput) {
+        return
+    }
+    
+    activeShape.moveShape(key)
+})
+
+init();
