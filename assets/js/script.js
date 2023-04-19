@@ -38,7 +38,11 @@ document.addEventListener("keydown", ({ key }) => {
         return
     }
     
-    activeShape.moveShape(key)
+    if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowDown" || key === "ArrowUp") {
+        activeShape.moveShape(key)
+    } else if (key === "1" || key === "2") {
+        activeShape.rotatePiece(key)
+    }
 });
 
 

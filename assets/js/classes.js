@@ -54,6 +54,7 @@ class Shape {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+        this.position = 1;
     }
 
     populateShape(show) {
@@ -118,7 +119,7 @@ class Shape {
 
         while (this.canShapeMove("ArrowDown")) {
             await delay(1000)
-            
+
             // User could reach bottom with arrow keys 
             if (this.canShapeMove("ArrowDown")) {
                 this.moveShape("ArrowDown")
@@ -132,8 +133,8 @@ class Shape {
 }
 
 class L extends Shape {
-    constructor(x, y) {
-        super(x, y);
+    constructor(x, y, position) {
+        super(x, y, position);
         this.color = "light-blue";
         this.focalBox = new Box(x, y, this.color);
         this.boxes = [
@@ -142,5 +143,132 @@ class L extends Shape {
             this.focalBox,
             new Box(x + 1, y, this.color)
         ]
+    }
+
+    rotatePiece(num) {
+
+        this.populateShape(false);
+
+        if (num == 1) {
+            switch (this.position) {
+                case 1:
+                    this.boxes[0].x++
+                    this.boxes[0].y += 2
+
+                    this.boxes[1].y++
+
+                    this.boxes[2].x--
+
+                    this.boxes[3].x += -2
+                    this.boxes[3].y--
+
+                    this.position = 4
+                    break;
+
+                case 2:
+                    this.boxes[0].x += -2
+                    this.boxes[0].y++
+
+                    this.boxes[1].x--
+
+                    this.boxes[2].y--
+
+                    this.boxes[3].x++
+                    this.boxes[3].y += -2
+
+                    this.position--
+                    break;
+
+                case 3:
+                    this.boxes[0].x--
+                    this.boxes[0].y += -2
+
+                    this.boxes[1].y--
+
+                    this.boxes[2].x++
+
+                    this.boxes[3].x += 2
+                    this.boxes[3].y++
+
+                    this.position--
+                    break;
+
+                default:
+                    this.boxes[0].x += 2
+                    this.boxes[0].y--
+
+                    this.boxes[1].x++
+
+                    this.boxes[2].y++
+
+                    this.boxes[3].x--
+                    this.boxes[3].y += 2
+
+                    this.position--
+                    break;
+            }
+        } else {
+            switch (this.position) {
+                case 1:
+                    this.boxes[0].x += 2
+                    this.boxes[0].y--
+
+                    this.boxes[1].x++
+
+                    this.boxes[2].y++
+
+                    this.boxes[3].x--
+                    this.boxes[3].y += 2
+
+                    this.position++
+                    break;
+
+                case 2:
+                    this.boxes[0].x++
+                    this.boxes[0].y += 2
+
+                    this.boxes[1].y++
+
+                    this.boxes[2].x--
+
+                    this.boxes[3].x += -2
+                    this.boxes[3].y--
+
+                    this.position++
+                    break;
+
+                case 3:
+                    this.boxes[0].x += -2
+                    this.boxes[0].y++
+
+                    this.boxes[1].x--
+
+                    this.boxes[2].y--
+
+                    this.boxes[3].x++
+                    this.boxes[3].y += -2
+
+                    this.position++
+                    break;
+
+                default:
+                    this.boxes[0].x--
+                    this.boxes[0].y -= 2
+
+                    this.boxes[1].y--
+
+                    this.boxes[2].x++
+
+                    this.boxes[3].x += 2
+                    this.boxes[3].y++
+
+                    this.position = 1
+                    break;
+            }
+        }
+
+        console.log(this.position);
+
+        this.populateShape(true);
     }
 }
