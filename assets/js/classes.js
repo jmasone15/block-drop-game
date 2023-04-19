@@ -89,10 +89,6 @@ class Shape {
 
     moveShape(direction) {
 
-        if (!this.canShapeMove(direction)) {
-            return;
-        }
-
         this.populateShape(false);
 
         for (let i = 0; i < this.boxes.length; i++) {
@@ -106,12 +102,32 @@ class Shape {
                 case "ArrowDown":
                     this.boxes[i].y++
                     break;
+                case "ArrowUp":
+                    this.boxes[i].y = 17
+                    break;
                 default:
                     break;
             }
         }
 
         this.populateShape(true);
+    }
+
+    async shapeGravity() {
+        this.populateShape(true);
+
+        while (this.canShapeMove("ArrowDown")) {
+            await delay(1000)
+            
+            // User could reach bottom with arrow keys 
+            if (this.canShapeMove("ArrowDown")) {
+                this.moveShape("ArrowDown")
+            } else {
+                break
+            }
+        }
+
+        return false
     }
 }
 

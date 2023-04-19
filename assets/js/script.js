@@ -10,9 +10,9 @@ const init = async () => {
 
 const game = async () => {
     activeShape = new L(5, 0);
-    activeShape.populateShape(true);
+    userInput = true;
 
-    userInput = true
+    userInput = await activeShape.shapeGravity();
 }
 
 const populateGrid = async () => {
@@ -39,6 +39,7 @@ document.addEventListener("keydown", ({ key }) => {
     }
     
     activeShape.moveShape(key)
-})
+});
+
 
 init();
