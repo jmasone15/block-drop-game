@@ -21,63 +21,42 @@ class Box {
         }
     }
 
-    canBoxMove(direction) {
-        let targetX = this.x;
-        let targetY = this.y;
+    canBoxMove(targetX, targetY, direction) {
+        let x = this.x;
+        let y = this.y;
 
-        switch (direction) {
-            case "ArrowLeft":
-                targetX--
-                break;
-            case "ArrowRight":
-                targetX++
-                break;
-            case "ArrowDown":
-                targetY++
-                break;
-            default:
-                break;
-        }
-
-        if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 17) {
-            return false
-        }
-
-        const targetRow = document.getElementById(`y${targetY}`);
-
-        if (!targetRow) {
-            return false
-        }
-
-        const targetBox = targetRow.children[targetX];
-
-        if (targetBox.classList.length == 0) {
-            return true
-        } else {
-            if (targetBox.getAttribute("shapeId") == this.shapeId) {
-                return true
-            } else {
-                return false
+        if (!targetX || !targetY) {
+            switch (direction) {
+                case "ArrowLeft":
+                    x--
+                    break;
+                case "ArrowRight":
+                    x++
+                    break;
+                case "ArrowDown":
+                    y++
+                    break;
+                default:
+                    break;
             }
+        } else {
+            x = targetX;
+            y = targetY;
         }
-    }
 
-    canBoxRotate(targetX, targetY) {
-        if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 17) {
+        // Blocked by borders
+        if (x < 0 || x > 9 || y < 0 || y > 17) {
             return false
         }
 
-        const targetRow = document.getElementById(`y${targetY}`);
-
-        if (!targetRow) {
-            return false
-        }
-
-        const targetBox = targetRow.children[targetX];
+        // Blocked by other shape
+        const targetRow = document.getElementById(`y${y}`);
+        const targetBox = targetRow.children[x];
 
         if (targetBox.classList.length == 0) {
             return true
         } else {
+            // Check to see if next location is owned by box within same shape
             if (targetBox.getAttribute("shapeId") == this.shapeId) {
                 return true
             } else {
@@ -104,8 +83,15 @@ class Shape {
         }
     }
 
-    canShapeMove(direction) {
-        const boxesCanMove = this.boxes.filter(x => x.canBoxMove(direction));
+    canShapeMove(direction, newPositions) {
+        let boxesCanMove;
+
+        if (!direction) {
+            boxesCanMove = this.boxes.filter((x, i) => x.canBoxMove(newPositions[i].x, newPositions[i].y, direction));
+        } else {
+            boxesCanMove = this.boxes.filter(x => x.canBoxMove(null, null, direction));
+        }
+
         return boxesCanMove.length == 4
     }
 
@@ -306,19 +292,13 @@ class L extends Shape {
         return [box0, box1, box2, box3]
     }
 
-    // If can't rotate because of external bounds, push the shape in the opposite direction and rerun
-    canPieceRotate(newPositions) {
-        const canBoxesRotate = this.boxes.filter((x, i) => x.canBoxRotate(newPositions[i].x, newPositions[i].y));
-        return canBoxesRotate.length == 4
-    }
-
     rotatePiece(num) {
 
         this.populateShape(false);
 
         const newPositions = this.getRotatedPositions(num);
 
-        if (this.canPieceRotate(newPositions)) {
+        if (this.canShapeMove("", newPositions)) {
             for (let i = 0; i < this.boxes.length; i++) {
                 this.boxes[i].x = newPositions[i].x
                 this.boxes[i].y = newPositions[i].y
