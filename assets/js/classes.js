@@ -44,17 +44,43 @@ class Box {
         }
 
         const targetRow = document.getElementById(`y${targetY}`);
+
+        if (!targetRow) {
+            return false
+        }
+
         const targetBox = targetRow.children[targetX];
 
         if (targetBox.classList.length == 0) {
-            console.log("1");
-            return true   
+            return true
         } else {
             if (targetBox.getAttribute("shapeId") == this.shapeId) {
-                console.log("2");
                 return true
             } else {
-                console.log("3");
+                return false
+            }
+        }
+    }
+
+    canBoxRotate(targetX, targetY) {
+        if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 17) {
+            return false
+        }
+
+        const targetRow = document.getElementById(`y${targetY}`);
+
+        if (!targetRow) {
+            return false
+        }
+
+        const targetBox = targetRow.children[targetX];
+
+        if (targetBox.classList.length == 0) {
+            return true
+        } else {
+            if (targetBox.getAttribute("shapeId") == this.shapeId) {
+                return true
+            } else {
                 return false
             }
         }
@@ -153,64 +179,66 @@ class L extends Shape {
         ]
     }
 
-    rotatePiece(num) {
-
-        this.populateShape(false);
+    getRotatedPositions(num) {
+        let box0 = { x: this.boxes[0].x, y: this.boxes[0].y };
+        let box1 = { x: this.boxes[1].x, y: this.boxes[1].y };
+        let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
+        let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
         if (num == 1) {
             switch (this.position) {
                 case 1:
-                    this.boxes[0].x++
-                    this.boxes[0].y += 2
+                    box0.x++
+                    box0.y += 2
 
-                    this.boxes[1].y++
+                    box1.y++
 
-                    this.boxes[2].x--
+                    box2.x--
 
-                    this.boxes[3].x += -2
-                    this.boxes[3].y--
+                    box3.x += -2
+                    box3.y--
 
                     this.position = 4
                     break;
 
                 case 2:
-                    this.boxes[0].x += -2
-                    this.boxes[0].y++
+                    box0.x += -2
+                    box0.y++
 
-                    this.boxes[1].x--
+                    box1.x--
 
-                    this.boxes[2].y--
+                    box2.y--
 
-                    this.boxes[3].x++
-                    this.boxes[3].y += -2
+                    box3.x++
+                    box3.y += -2
 
                     this.position--
                     break;
 
                 case 3:
-                    this.boxes[0].x--
-                    this.boxes[0].y += -2
+                    box0.x--
+                    box0.y += -2
 
-                    this.boxes[1].y--
+                    box1.y--
 
-                    this.boxes[2].x++
+                    box2.x++
 
-                    this.boxes[3].x += 2
-                    this.boxes[3].y++
+                    box3.x += 2
+                    box3.y++
 
                     this.position--
                     break;
 
                 default:
-                    this.boxes[0].x += 2
-                    this.boxes[0].y--
+                    box0.x += 2
+                    box0.y--
 
-                    this.boxes[1].x++
+                    box1.x++
 
-                    this.boxes[2].y++
+                    box2.y++
 
-                    this.boxes[3].x--
-                    this.boxes[3].y += 2
+                    box3.x--
+                    box3.y += 2
 
                     this.position--
                     break;
@@ -218,62 +246,85 @@ class L extends Shape {
         } else {
             switch (this.position) {
                 case 1:
-                    this.boxes[0].x += 2
-                    this.boxes[0].y--
+                    box0.x += 2
+                    box0.y--
 
-                    this.boxes[1].x++
+                    box1.x++
 
-                    this.boxes[2].y++
+                    box2.y++
 
-                    this.boxes[3].x--
-                    this.boxes[3].y += 2
+                    box3.x--
+                    box3.y += 2
 
                     this.position++
                     break;
 
                 case 2:
-                    this.boxes[0].x++
-                    this.boxes[0].y += 2
+                    box0.x++
+                    box0.y += 2
 
-                    this.boxes[1].y++
+                    box1.y++
 
-                    this.boxes[2].x--
+                    box2.x--
 
-                    this.boxes[3].x += -2
-                    this.boxes[3].y--
+                    box3.x += -2
+                    box3.y--
 
                     this.position++
                     break;
 
                 case 3:
-                    this.boxes[0].x += -2
-                    this.boxes[0].y++
+                    box0.x += -2
+                    box0.y++
 
-                    this.boxes[1].x--
+                    box1.x--
 
-                    this.boxes[2].y--
+                    box2.y--
 
-                    this.boxes[3].x++
-                    this.boxes[3].y += -2
+                    box3.x++
+                    box3.y += -2
 
                     this.position++
                     break;
 
                 default:
-                    this.boxes[0].x--
-                    this.boxes[0].y -= 2
+                    box0.x--
+                    box0.y -= 2
 
-                    this.boxes[1].y--
+                    box1.y--
 
-                    this.boxes[2].x++
+                    box2.x++
 
-                    this.boxes[3].x += 2
-                    this.boxes[3].y++
+                    box3.x += 2
+                    box3.y++
 
                     this.position = 1
                     break;
             }
         }
+
+        return [box0, box1, box2, box3]
+    }
+
+    // If can't rotate because of external bounds, push the shape in the opposite direction and rerun
+    canPieceRotate(newPositions) {
+        const canBoxesRotate = this.boxes.filter((x, i) => x.canBoxRotate(newPositions[i].x, newPositions[i].y));
+        return canBoxesRotate.length == 4
+    }
+
+    rotatePiece(num) {
+
+        this.populateShape(false);
+
+        const newPositions = this.getRotatedPositions(num);
+
+        if (this.canPieceRotate(newPositions)) {
+            for (let i = 0; i < this.boxes.length; i++) {
+                this.boxes[i].x = newPositions[i].x
+                this.boxes[i].y = newPositions[i].y
+            }
+        }
+
 
         this.populateShape(true);
     }
