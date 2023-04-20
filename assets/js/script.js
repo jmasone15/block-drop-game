@@ -22,8 +22,8 @@ const createShape = async () => {
     shapeCounter++
     activeShape = new L(5, 0, shapeCounter);
     userInput = true;
-    userInput = await activeShape.shapeGravity();
-    await delay(1000)
+    userInput = await activeShape.shapeGravity(true);
+    await delay(500)
 }
 
 const populateGrid = async () => {

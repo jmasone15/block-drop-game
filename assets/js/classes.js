@@ -123,12 +123,19 @@ class Shape {
         this.populateShape(true);
     }
 
-    async shapeGravity() {
-        this.populateShape(true);
+    async shapeGravity(initial) {
+        let initialVar = initial
+        if (initialVar) {
+            this.populateShape(true);
+        }
 
         while (this.canShapeMove("ArrowDown")) {
-            await delay(500)
-
+            console.log(initialVar);
+            if (initialVar) {
+                await delay(500)
+            } else {
+                initialVar = true
+            }
             // User could reach bottom with arrow keys 
             if (this.canShapeMove("ArrowDown")) {
                 this.moveShape("ArrowDown")
@@ -139,13 +146,9 @@ class Shape {
 
         await delay(500)
 
-        while (this.canShapeMove("ArrowDown")) {
-            // User could reach bottom with arrow keys 
-            if (this.canShapeMove("ArrowDown")) {
-                this.moveShape("ArrowDown")
-            } else {
-                break
-            }
+        // Give users a buffer window for moving or rotating pieces after the piece is blocked
+        if (this.canShapeMove("ArrowDown")) {
+            return this.shapeGravity(false);
         }
 
         return false
