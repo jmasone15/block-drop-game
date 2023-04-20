@@ -1,60 +1,75 @@
 // X goes from 0 - 9
 // Y goes from 0 - 17
 class Box {
-    constructor(x, y, color) {
+    constructor(x, y, color, shapeId) {
         this.x = x;
         this.y = y;
         this.color = color;
-    }
-
-    targetDiv() {
-        const row = document.getElementById(`y${this.y}`);
-        return row.children[this.x]
+        this.shapeId = shapeId;
     }
 
     updateDom(show) {
-        const div = this.targetDiv();
+        const row = document.getElementById(`y${this.y}`);
+        const div = row.children[this.x];
 
         if (show) {
             div.setAttribute("class", this.color);
+            div.setAttribute("shapeId", this.shapeId);
         } else {
             div.removeAttribute("class");
+            div.removeAttribute("shapeId");
         }
     }
 
-    isTouching() {
+    canBoxMove(direction) {
+        let targetX = this.x;
+        let targetY = this.y;
 
-        if (this.y < 17) {
-            const nextRow = document.getElementById(`y${this.y + 1}`);
-            const targetDiv = nextRow.children[this.x];
-            return targetDiv.classList.length > 0
+        switch (direction) {
+            case "ArrowLeft":
+                targetX--
+                break;
+            case "ArrowRight":
+                targetX++
+                break;
+            case "ArrowDown":
+                targetY++
+                break;
+            default:
+                break;
         }
 
-        return true
-    }
-
-    async gravity() {
-        this.updateDom(true);
-
-        await delay(100);
-
-        while (!this.isTouching()) {
-            this.updateDom(false)
-            this.y++
-            this.updateDom(true)
-            await delay(50)
+        if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 17) {
+            return false
         }
 
+        const targetRow = document.getElementById(`y${targetY}`);
+        const targetBox = targetRow.children[targetX];
+
+        if (targetBox.classList.length == 0) {
+            console.log("1");
+            return true   
+        } else {
+            if (targetBox.getAttribute("shapeId") == this.shapeId) {
+                console.log("2");
+                return true
+            } else {
+                console.log("3");
+                return false
+            }
+        }
     }
 }
 
 // L piece (light-blue) | O piece (yellow) | T piece (magenta) | S piece (green)
 // Z piece (red) | J piece (blue) | L piece (orange)
 class Shape {
-    constructor(x, y) {
+    constructor(x, y, shapeId) {
         this.x = x;
         this.y = y;
         this.position = 1;
+        this.color = "";
+        this.shapeId = shapeId;
     }
 
     populateShape(show) {
@@ -64,33 +79,18 @@ class Shape {
     }
 
     canShapeMove(direction) {
-        for (let i = 0; i < this.boxes.length; i++) {
-
-            switch (direction) {
-                case "ArrowLeft":
-                    if (this.boxes[i].x == 0) {
-                        return false
-                    }
-                    break;
-                case "ArrowRight":
-                    if (this.boxes[i].x == 9) {
-                        return false
-                    }
-                    break;
-                default:
-                    if (this.boxes[i].y == 17) {
-                        return false
-                    }
-                    break;
-            }
-        }
-
-        return true
+        const boxesCanMove = this.boxes.filter(x => x.canBoxMove(direction));
+        return boxesCanMove.length == 4
     }
 
     moveShape(direction) {
 
         this.populateShape(false);
+
+        if (!this.canShapeMove(direction)) {
+            this.populateShape(true);
+            return
+        }
 
         for (let i = 0; i < this.boxes.length; i++) {
             switch (direction) {
@@ -102,9 +102,6 @@ class Shape {
                     break;
                 case "ArrowDown":
                     this.boxes[i].y++
-                    break;
-                case "ArrowUp":
-                    this.boxes[i].y = 17
                     break;
                 default:
                     break;
@@ -118,8 +115,19 @@ class Shape {
         this.populateShape(true);
 
         while (this.canShapeMove("ArrowDown")) {
-            await delay(1000)
+            await delay(500)
 
+            // User could reach bottom with arrow keys 
+            if (this.canShapeMove("ArrowDown")) {
+                this.moveShape("ArrowDown")
+            } else {
+                break
+            }
+        }
+
+        await delay(500)
+
+        while (this.canShapeMove("ArrowDown")) {
             // User could reach bottom with arrow keys 
             if (this.canShapeMove("ArrowDown")) {
                 this.moveShape("ArrowDown")
@@ -133,15 +141,15 @@ class Shape {
 }
 
 class L extends Shape {
-    constructor(x, y, position) {
-        super(x, y, position);
+    constructor(x, y, position, color, shapeId) {
+        super(x, y, position, color, shapeId);
         this.color = "light-blue";
-        this.focalBox = new Box(x, y, this.color);
+        this.focalBox = new Box(x, y, this.color, this.shapeId);
         this.boxes = [
-            new Box(x - 2, y, this.color),
-            new Box(x - 1, y, this.color),
+            new Box(x - 2, y, this.color, this.shapeId),
+            new Box(x - 1, y, this.color, this.shapeId),
             this.focalBox,
-            new Box(x + 1, y, this.color)
+            new Box(x + 1, y, this.color, this.shapeId)
         ]
     }
 
@@ -266,8 +274,6 @@ class L extends Shape {
                     break;
             }
         }
-
-        console.log(this.position);
 
         this.populateShape(true);
     }
