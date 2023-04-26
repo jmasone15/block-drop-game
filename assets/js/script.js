@@ -23,7 +23,7 @@ const game = async () => {
 
 const createShape = async () => {
     shapeCounter++
-    activeShape = new L(5, 0, shapeCounter);
+    activeShape = new J(5, 0, shapeCounter);
     userInput = true;
     userInput = await activeShape.shapeGravity(true);
     shapes.push(activeShape);
@@ -119,3 +119,14 @@ document.getElementById("btn").addEventListener("click", () => {
     document.getElementById("btn").setAttribute("class", "display-none");
     init();
 });
+
+
+// TODO
+// All tetrimino pieces
+// Piece generation
+// End game
+// Wall kick when rotating
+// Hard drop w/ Up Arrow
+// Points
+// Speed Increase over time
+// UI

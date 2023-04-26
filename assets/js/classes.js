@@ -158,7 +158,7 @@ class Shape {
     }
 }
 
-class L extends Shape {
+class I extends Shape {
     constructor(x, y, position, color, shapeId) {
         super(x, y, position, color, shapeId);
         this.color = "light-blue";
@@ -190,7 +190,6 @@ class L extends Shape {
                     box3.x += -2
                     box3.y--
 
-                    this.position = 4
                     break;
 
                 case 2:
@@ -204,7 +203,6 @@ class L extends Shape {
                     box3.x++
                     box3.y += -2
 
-                    this.position--
                     break;
 
                 case 3:
@@ -218,7 +216,6 @@ class L extends Shape {
                     box3.x += 2
                     box3.y++
 
-                    this.position--
                     break;
 
                 default:
@@ -232,7 +229,6 @@ class L extends Shape {
                     box3.x--
                     box3.y += 2
 
-                    this.position--
                     break;
             }
         } else {
@@ -248,7 +244,6 @@ class L extends Shape {
                     box3.x--
                     box3.y += 2
 
-                    this.position++
                     break;
 
                 case 2:
@@ -262,7 +257,6 @@ class L extends Shape {
                     box3.x += -2
                     box3.y--
 
-                    this.position++
                     break;
 
                 case 3:
@@ -276,7 +270,6 @@ class L extends Shape {
                     box3.x++
                     box3.y += -2
 
-                    this.position++
                     break;
 
                 default:
@@ -290,7 +283,6 @@ class L extends Shape {
                     box3.x += 2
                     box3.y++
 
-                    this.position = 1
                     break;
             }
         }
@@ -305,6 +297,169 @@ class L extends Shape {
         const newPositions = this.getRotatedPositions(num);
 
         if (this.canShapeMove("", newPositions)) {
+
+            if (num == 1) {
+                if (this.position == 1) {
+                    this.position = 4
+                } else {
+                    this.position--
+                }
+            } else {
+                if (this.position == 4) {
+                    this.position = 1
+                } else {
+                    this.position++
+                }
+            }
+
+            for (let i = 0; i < this.boxes.length; i++) {
+                this.boxes[i].x = newPositions[i].x
+                this.boxes[i].y = newPositions[i].y
+            }
+        }
+
+
+        this.populateShape(true);
+    }
+}
+
+class J extends Shape {
+    constructor(x, y, position, color, shapeId) {
+        super(x, y, position, color, shapeId);
+        this.color = "blue";
+        this.focalBox = new Box(x, y + 1, this.color, this.shapeId);
+        this.boxes = [
+            new Box(x - 1, y, this.color, this.shapeId),
+            new Box(x - 1, y + 1, this.color, this.shapeId),
+            this.focalBox,
+            new Box(x + 1, y + 1, this.color, this.shapeId)
+        ]
+    }
+
+    getRotatedPositions(num) {
+        let box0 = { x: this.boxes[0].x, y: this.boxes[0].y };
+        let box1 = { x: this.boxes[1].x, y: this.boxes[1].y };
+        let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
+        let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
+
+        if (num == 1) {
+            switch (this.position) {
+                case 1:
+                    box0.y += 2
+
+                    box1.x++
+                    box1.y++
+
+                    box3.x--
+                    box3.y--
+
+                    break;
+
+                case 2:
+                    box0.x -= 2
+
+                    box1.x--
+                    box1.y++
+
+                    box3.x++
+                    box3.y--
+
+                    break;
+
+                case 3:
+                    box0.y -= 2
+                    
+                    box1.x--
+                    box1.y--
+
+                    box3.x++
+                    box3.y++
+
+                    break;
+
+                default:
+                    box0.x += 2
+
+                    box1.x++
+                    box1.y--
+
+                    box3.x--
+                    box3.y++
+
+                    break;
+            }
+        } else {
+            switch (this.position) {
+                case 1:
+                    box0.x += 2
+
+                    box1.x++
+                    box1.y--
+
+                    box3.x--
+                    box3.y++
+                    break;
+
+                case 2:
+                    box0.y += 2;
+
+                    box1.x++
+                    box1.y++
+
+                    box3.x--
+                    box3.y--
+
+                    break;
+
+                case 3:
+                    box0.x -= 2
+
+                    box1.x--
+                    box1.y++
+
+                    box3.x++
+                    box3.y--
+
+                    break;
+
+                default:
+                    box0.y -= 2
+
+                    box1.y--
+                    box1.x--
+
+                    box3.x++
+                    box3.y++
+
+                    break;
+            }
+        }
+
+        return [box0, box1, box2, box3]
+    }
+
+    rotatePiece(num) {
+
+        this.populateShape(false);
+
+        const newPositions = this.getRotatedPositions(num);
+
+        if (this.canShapeMove("", newPositions)) {
+
+            if (num == 1) {
+                if (this.position == 1) {
+                    this.position = 4
+                } else {
+                    this.position--
+                }
+            } else {
+                if (this.position == 4) {
+                    this.position = 1
+                } else {
+                    this.position++
+                }
+            }
+
             for (let i = 0; i < this.boxes.length; i++) {
                 this.boxes[i].x = newPositions[i].x
                 this.boxes[i].y = newPositions[i].y
