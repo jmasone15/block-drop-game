@@ -34,7 +34,7 @@ const createShape = async () => {
 
 const populateGrid = async () => {
 
-    await delay(1000)
+    await delay(250)
 
     for (let i = 0; i < 18; i++) {
         const section = document.createElement("section");
@@ -114,5 +114,8 @@ document.addEventListener("keydown", ({ key }) => {
     }
 });
 
-
-init();
+document.getElementById("btn").addEventListener("click", () => {
+    document.getElementById("game-box").removeAttribute("class");
+    document.getElementById("btn").setAttribute("class", "display-none");
+    init();
+});
