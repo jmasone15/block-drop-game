@@ -1,8 +1,11 @@
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 let userInput = false;
 let activeShape;
 let shapeCounter = 0;
 let gameActive = false;
+let allRows = [];
+let shapes = [];
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const init = async () => {
     await populateGrid();
@@ -23,7 +26,10 @@ const createShape = async () => {
     activeShape = new L(5, 0, shapeCounter);
     userInput = true;
     userInput = await activeShape.shapeGravity(true);
-    await delay(500)
+    shapes.push(activeShape);
+    await clearRows();
+
+    await delay(500);
 }
 
 const populateGrid = async () => {
@@ -42,13 +48,65 @@ const populateGrid = async () => {
             await delay(10)
         }
     }
+
+    allRows = [...document.getElementsByTagName("section")]
+}
+
+const clearRows = async () => {
+    let clearedRows = [];
+
+    for (let i = 0; i < allRows.length; i++) {
+        const childDivs = Array.from(allRows[i].children);
+
+        // If row is full
+        if (childDivs.filter(div => div.classList.length !== 0).length == 10) {
+
+            clearedRows.push(i);
+
+            // Remove attributes from all blocks
+            for (let j = 0; j < childDivs.length; j++) {
+
+                childDivs[j].removeAttribute("class");
+                childDivs[j].removeAttribute("shapeid");
+
+            }
+        }
+    }
+
+    // Update every shape on the page to move down but still keep it's form
+    if (clearedRows.length > 0) {
+
+        await delay(500)
+
+        shapes.forEach(shape => {
+            const filteredBoxes = shape.boxes.filter(box => !clearedRows.includes(box.y));
+            shape.boxes = filteredBoxes
+        });
+
+        const filteredShapes = shapes.filter(shape => {
+            return shape.boxes.length !== 0
+        });
+
+        shapes = filteredShapes
+
+        // Can't move entire shape, in case the shape has been broken up by a cleared line
+        shapes.forEach(({ boxes }) => {
+            boxes.forEach(box => {
+                if (box.canBoxMove(null, null, "ArrowDown")) {
+                    box.updateDom(false);
+                    box.y++
+                    box.updateDom(true);
+                }
+            })
+        });
+    }
 }
 
 document.addEventListener("keydown", ({ key }) => {
     if (!userInput) {
         return
     }
-    
+
     if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowDown" || key === "ArrowUp") {
         activeShape.moveShape(key)
     } else if (key == 1 || key == 2) {

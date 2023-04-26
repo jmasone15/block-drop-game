@@ -92,14 +92,14 @@ class Shape {
             boxesCanMove = this.boxes.filter(x => x.canBoxMove(null, null, direction));
         }
 
-        return boxesCanMove.length == 4
+        return boxesCanMove.length == this.boxes.length
     }
 
     moveShape(direction) {
 
         this.populateShape(false);
 
-        if (!this.canShapeMove(direction)) {
+        if (!this.canShapeMove(direction, [])) {
             this.populateShape(true);
             return
         }
@@ -130,7 +130,6 @@ class Shape {
         }
 
         while (this.canShapeMove("ArrowDown")) {
-            console.log(initialVar);
             if (initialVar) {
                 await delay(500)
             } else {
@@ -149,8 +148,12 @@ class Shape {
         // Give users a buffer window for moving or rotating pieces after the piece is blocked
         if (this.canShapeMove("ArrowDown")) {
             return this.shapeGravity(false);
+        } else {
+            // Set the shape to the focal point
+            this.x = this.boxes[2].x
+            this.y = this.boxes[2].y
         }
-
+        
         return false
     }
 }
