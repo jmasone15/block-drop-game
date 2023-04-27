@@ -122,7 +122,7 @@ document.getElementById("btn").addEventListener("click", () => {
 
 
 // TODO
-// All tetrimino pieces
+// All tetrimino pieces - DONE
 // Piece generation
 // End game
 // Wall kick when rotating
