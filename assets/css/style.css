@@ -56,6 +56,9 @@ div {
     height: 58px;
     width: 58px;
     border: 1px solid grey;
+    text-align: center;
+    font-size: 50px;
+    color: white;
 }
 
 .active {

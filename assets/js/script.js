@@ -23,7 +23,7 @@ const game = async () => {
 
 const createShape = async () => {
     shapeCounter++
-    activeShape = new J(5, 0, shapeCounter);
+    activeShape = new S(5, 0, shapeCounter);
     userInput = true;
     userInput = await activeShape.shapeGravity(true);
     shapes.push(activeShape);
