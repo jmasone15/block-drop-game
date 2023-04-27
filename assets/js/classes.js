@@ -904,37 +904,85 @@ class Z extends Shape {
         if (num == 1) {
             switch (this.position) {
                 case 1:
+                    box0.y += 2
 
+                    box1.x--
+                    box1.y++
+
+                    box3.x--
+                    box3.y--
                     break;
 
                 case 2:
+                    box0.x -= 2
 
+                    box1.x--
+                    box1.y--
+
+                    box3.x++
+                    box3.y--
                     break;
 
                 case 3:
+                    box0.y -= 2
 
+                    box1.x++
+                    box1.y--
+
+                    box3.x++
+                    box3.y++
                     break;
 
                 default:
+                    box0.x += 2
 
+                    box1.x++
+                    box1.y++
+
+                    box3.x--
+                    box3.y++
                     break;
             }
         } else {
             switch (this.position) {
                 case 1:
+                    box0.x += 2
 
+                    box1.x++
+                    box1.y++
+
+                    box3.x--
+                    box3.y++
                     break;
 
                 case 2:
+                    box0.y += 2
 
+                    box1.x--
+                    box1.y++
+
+                    box3.x--
+                    box3.y--
                     break;
 
                 case 3:
+                    box0.x -= 2
 
+                    box1.x--
+                    box1.y--
+
+                    box3.x++
+                    box3.y--
                     break;
 
                 default:
+                    box0.y -= 2
 
+                    box1.x++
+                    box1.y--
+
+                    box3.x++
+                    box3.y++
                     break;
             }
         }
