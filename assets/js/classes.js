@@ -16,11 +16,11 @@ class Box {
         if (show) {
             div.setAttribute("class", this.color);
             div.setAttribute("shapeId", this.shapeId);
-            div.textContent = this.order;
+            // div.textContent = this.order;
         } else {
             div.removeAttribute("class");
             div.removeAttribute("shapeId");
-            div.textContent = "";
+            // div.textContent = "";
         }
     }
 

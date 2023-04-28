@@ -91,6 +91,8 @@ const clearRows = async () => {
             return shape.boxes.length !== 0
         });
 
+        console.log(filteredShapes);
+
         shapes = filteredShapes
 
         // Can't move entire shape, in case the shape has been broken up by a cleared line
@@ -147,7 +149,8 @@ document.getElementById("btn").addEventListener("click", () => {
 
 // TODO
 // All tetrimino pieces - DONE
-// Piece generation
+// Piece generation - DONE
+// Rework line-clearing logic
 // End game
 // Wall kick when rotating
 // Hard drop w/ Up Arrow
