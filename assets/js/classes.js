@@ -154,9 +154,6 @@ class Shape {
             }
         }
 
-        console.log(this.position);
-
-
         this.populateShape(true);
     }
 

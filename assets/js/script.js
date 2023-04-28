@@ -17,13 +17,17 @@ const game = async () => {
     gameActive = true;
 
     while (gameActive) {
-        await createShape();
+        let currentBag = bagGeneration();
+
+        for (let i = 0; i < currentBag.length; i++) {
+            await createShape(currentBag[i])
+        }
     }
 }
 
-const createShape = async () => {
+const createShape = async (shape) => {
     shapeCounter++
-    activeShape = new Z(5, 0, shapeCounter);
+    activeShape = eval(`new ${shape}(5, 0, ${shapeCounter})`);
     userInput = true;
     userInput = await activeShape.shapeGravity(true);
     shapes.push(activeShape);
@@ -100,6 +104,26 @@ const clearRows = async () => {
             })
         });
     }
+}
+
+// Generate a bag of pieces in any order
+// Using each piece only once
+const bagGeneration = () => {
+    let pieces = ["I", "J", "L", "O", "S", "T", "Z"];
+    let bag = [];
+
+    for (let i = 0; i < pieces.length; i++) {
+        let position = Math.floor(Math.random() * 7);
+
+        if (bag.includes(position)) {
+            i--
+            continue;
+        } else {
+            bag.push(position)
+        }
+    }
+
+    return bag.map(x => pieces[x])
 }
 
 document.addEventListener("keydown", ({ key }) => {
