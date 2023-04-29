@@ -91,20 +91,19 @@ const clearRows = async () => {
             return shape.boxes.length !== 0
         });
 
-        console.log(filteredShapes);
-
         shapes = filteredShapes
 
-        // Can't move entire shape, in case the shape has been broken up by a cleared line
-        shapes.forEach(({ boxes }) => {
-            boxes.forEach(box => {
-                if (box.canBoxMove(null, null, "ArrowDown")) {
-                    box.updateDom(false);
-                    box.y++
-                    box.updateDom(true);
-                }
-            })
-        });
+        for (let i = Math.min(...clearedRows); i > -1; i--) {
+            shapes.forEach(({ boxes }) => {
+                boxes.forEach((box) => {
+                    if (box.y == i) {
+                        box.updateDom(false);
+                        box.y += clearedRows.length;
+                        box.updateDom(true);
+                    }
+                });
+            });
+        }
     }
 }
 
@@ -150,7 +149,7 @@ document.getElementById("btn").addEventListener("click", () => {
 // TODO
 // All tetrimino pieces - DONE
 // Piece generation - DONE
-// Rework line-clearing logic
+// Rework line-clearing logic - DONE
 // End game
 // Wall kick when rotating
 // Hard drop w/ Up Arrow

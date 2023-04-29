@@ -24,7 +24,7 @@ class Box {
         }
     }
 
-    canBoxMove(targetX, targetY, direction) {
+    canBoxMove(targetX, targetY, direction, ignoreShapeId) {
         let x = this.x;
         let y = this.y;
 
@@ -60,7 +60,7 @@ class Box {
             return true
         } else {
             // Check to see if next location is owned by box within same shape
-            if (targetBox.getAttribute("shapeId") == this.shapeId) {
+            if (targetBox.getAttribute("shapeId") == this.shapeId && !ignoreShapeId) {
                 return true
             } else {
                 return false
@@ -165,7 +165,7 @@ class Shape {
 
         while (this.canShapeMove("ArrowDown")) {
             if (initialVar) {
-                await delay(500)
+                await delay(250)
             } else {
                 initialVar = true
             }
@@ -177,7 +177,7 @@ class Shape {
             }
         }
 
-        await delay(500)
+        await delay(250)
 
         // Give users a buffer window for moving or rotating pieces after the piece is blocked
         if (this.canShapeMove("ArrowDown")) {
