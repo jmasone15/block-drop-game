@@ -9,18 +9,16 @@ class Box {
         this.order = order;
     }
 
-    updateDom(show) {
-        const row = document.getElementById(`y${this.y}`);
+    updateDom(show, isSmall) {
+        const row = isSmall ? document.getElementById(`small-y${this.y}`) : document.getElementById(`y${this.y}`);
         const div = row.children[this.x];
 
         if (show) {
-            div.setAttribute("class", this.color);
+            div.classList.add(this.color);
             div.setAttribute("shapeId", this.shapeId);
-            // div.textContent = this.order;
         } else {
-            div.removeAttribute("class");
+            div.classList.remove(this.color);
             div.removeAttribute("shapeId");
-            // div.textContent = "";
         }
     }
 
@@ -80,9 +78,9 @@ class Shape {
         this.shapeId = shapeId;
     }
 
-    populateShape(show) {
+    populateShape(show, isSmall) {
         for (let i = 0; i < this.boxes.length; i++) {
-            this.boxes[i].updateDom(show);
+            this.boxes[i].updateDom(show, isSmall);
         }
     }
 

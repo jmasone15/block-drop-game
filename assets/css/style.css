@@ -42,7 +42,6 @@ main {
     margin: 100px 0;
     border: 3px solid black;
     height: 75vh;
-    width: 50vw;
     width: 600px;
     height: 1080px;
 }
@@ -59,6 +58,39 @@ div {
     text-align: center;
     font-size: 50px;
     color: white;
+}
+
+article {
+    display: flex;
+    flex-direction: row;
+}
+
+.small-div {
+    height: 28px;
+    width: 28px;
+}
+
+header {
+    display: flex;
+}
+
+figure {
+    margin-top: 200px;
+    text-align: center;
+}
+
+aside {
+    border: 3px solid black;
+    height: 150px;
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.text {
+    margin-bottom: 0px;
+    font-size: 30px;
 }
 
 .active {

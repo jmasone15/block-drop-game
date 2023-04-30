@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,10 +8,22 @@
     <link rel="stylesheet" href="./assets/css/style.css">
     <title>Block Drop</title>
 </head>
+
 <body>
     <button id="btn">Start</button>
-    <main id="game-box" class="display-none"></main>
+    <header>
+        <figure id="hold" style="margin-right: 50px;" class="display-none">
+            <p class="text">Hold</p>
+            <aside id="hold-piece"></aside>
+        </figure>
+        <main id="game-box" class="display-none"></main>
+        <figure id="next" style="margin-left: 50px;" class="display-none">
+            <p class="text">Next</p>
+            <aside id="next-piece"></aside>
+        </figure>
+    </header>
     <script src="./assets/js/script.js"></script>
     <script src="./assets/js/classes.js"></script>
 </body>
+
 </html>

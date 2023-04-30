@@ -5,15 +5,20 @@ let gameActive = false;
 let allRows = [];
 let shapes = [];
 let score = 0;
+let holdPiece;
 
 const gameBoxEl = document.getElementById("game-box");
+const holdEl = document.getElementById("hold");
+const nextEl = document.getElementById("next");
+const nextPieceEl = document.getElementById("next-piece");
+const holdPieceEl = document.getElementById("hold-piece");
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const init = async () => {
     await populateGrid();
 
-    await delay(2000);
+    await delay(1000);
 
     return game();
 }
@@ -21,43 +26,89 @@ const init = async () => {
 const game = async () => {
     gameActive = true;
 
-    while (gameActive) {
-        let currentBag = bagGeneration();
+    // Want to generate current bag and next bag to display pieces in "Next" box
+    let currentBag = bagGeneration();
+    let nextBag = bagGeneration();
 
-        for (let i = 0; i < currentBag.length; i++) {
-            let result = await createShape(currentBag[i]);
+    for (let i = 0; i < currentBag.length; i++) {
+        let shape = currentBag[i];
 
-            if (!result) {
-                return endGame()
+        // Block out
+        for (let j = 0; j < shape.boxes.length; j++) {
+            const { x, y } = shape.boxes[j];
+            let targetRow = document.getElementById(`y${y}`);
+            let targetBox = targetRow.children[x];
+
+            if (targetBox.classList.length !== 0) {
+                gameActive = false
+                break
             }
         }
-    }
-}
 
-const createShape = async (shape) => {
-    console.log("test");
+        if (!gameActive) {
+            break
+        }
 
-    for (let i = 0; i < shape.boxes.length; i++) {
-        const { x, y } = shape.boxes[i];
-        let targetRow = document.getElementById(`y${y}`);
-        let targetBox = targetRow.children[x];
+        displayShape(i == 6 ? nextBag[0].color: currentBag[i + 1].color);
 
-        if (targetBox.classList.length !== 0) {
-            return false
+        shapeCounter++
+        shape.updateShapeId(shapeCounter);
+        activeShape = shape;
+        userInput = true;
+        userInput = await activeShape.shapeGravity(true);
+        userInput = false;
+        shapes.push(activeShape);
+
+        await clearRows();
+        await delay(500);
+
+        // Last iteration requery bag generation.
+        if (i == 6) {
+            currentBag = nextBag;
+            nextBag = bagGeneration();
+            i = 0;
         }
     }
 
-    shapeCounter++
-    shape.updateShapeId(shapeCounter);
-    activeShape = shape;
-    userInput = true;
-    userInput = await activeShape.shapeGravity(true);
-    shapes.push(activeShape);
-    await clearRows();
+    return endGame()
+}
 
-    await delay(500);
+const displayShape = (color) => {
+    for (let i = 0; i < 5; i++) {
+        const section = document.getElementById(`small-y${i}`);
 
-    return true
+        for (let j = 0; j < section.children.length; j++) {
+            section.children[j].setAttribute("class", "small-div");
+        }
+    }
+
+    let shape;
+
+    switch (color) {
+        case "light-blue":
+            shape = new I(2, 2, 0);
+            break;
+        case "yellow":
+            shape = new O(2, 1);
+            break;
+        case "orange":
+            shape = new L(2, 1);
+            break;
+        case "red":
+            shape = new Z(2, 1);
+            break;
+        case "green":
+            shape = new S(2, 1);
+            break;
+        case "magenta":
+            shape = new T(2, 1);
+            break;
+        default:
+            shape = new J(2, 1);
+            break;
+    }
+
+    shape.populateShape(true, true)
 }
 
 const populateGrid = async () => {
@@ -74,6 +125,22 @@ const populateGrid = async () => {
             const div = document.createElement("div");
             section.appendChild(div);
             await delay(10)
+        }
+    }
+
+    holdEl.removeAttribute("class");
+    nextEl.removeAttribute("class");
+
+    for (let i = 0; i < 5; i++) {
+        const section = document.createElement("article");
+        section.setAttribute("id", `small-y${i}`);
+        section.setAttribute("class", `small-row`);
+        nextPieceEl.appendChild(section);
+
+        for (let j = 0; j < 5; j++) {
+            const div = document.createElement("div");
+            div.setAttribute("class", "small-div");
+            section.appendChild(div);
         }
     }
 
@@ -131,8 +198,6 @@ const clearRows = async () => {
     }
 }
 
-// Generate a bag of pieces in any order
-// Using each piece only once
 const bagGeneration = () => {
     let pieces = [new I(5, 0), new J(5, 0), new L(5, 0), new O(5, 0), new S(5, 0), new T(5, 0), new Z(5, 0)];
     let bag = [];
@@ -153,7 +218,7 @@ const bagGeneration = () => {
 
 const endGame = async () => {
     userInput = false;
-    
+
     await delay(250);
 
     for (let i = 17; i > -1; i--) {
@@ -182,6 +247,10 @@ const endGame = async () => {
         for (let i = 0; i < gameOverElements.length; i++) {
             gameBoxEl.removeChild(gameOverElements[i]);
         }
+
+        shapes = [];
+        shapeCounter = 0;
+        score = 0;
 
         return init();
     });
@@ -216,7 +285,10 @@ document.getElementById("btn").addEventListener("click", () => {
 // Piece generation - DONE
 // Rework line-clearing logic - DONE
 // End game - DONE
-// Pause game when unfocus on screen
+// Next Piece - DONE
+// Hold piece
+// Black border around blocks
+// Clear row from left to right
 // Wall kick when rotating
 // Hard drop w/ Up Arrow
 // Points
