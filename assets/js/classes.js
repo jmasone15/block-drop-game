@@ -190,6 +190,14 @@ class Shape {
         
         return false
     }
+
+    updateShapeId(id) {
+        this.shapeId = id
+        
+        for (let i = 0; i < this.boxes.length; i++) {
+            this.boxes[i].shapeId = this.shapeId
+        }
+    }
 }
 
 class I extends Shape {

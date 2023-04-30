@@ -92,3 +92,10 @@ div {
 .magenta {
     background-color: var(--color-7);
 }
+
+.end-game {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

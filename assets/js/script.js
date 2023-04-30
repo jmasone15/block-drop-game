@@ -4,13 +4,18 @@ let shapeCounter = 0;
 let gameActive = false;
 let allRows = [];
 let shapes = [];
+let score = 0;
+
+const gameBoxEl = document.getElementById("game-box");
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const init = async () => {
     await populateGrid();
 
-    game();
+    await delay(2000);
+
+    return game();
 }
 
 const game = async () => {
@@ -20,20 +25,39 @@ const game = async () => {
         let currentBag = bagGeneration();
 
         for (let i = 0; i < currentBag.length; i++) {
-            await createShape(currentBag[i])
+            let result = await createShape(currentBag[i]);
+
+            if (!result) {
+                return endGame()
+            }
         }
     }
 }
 
 const createShape = async (shape) => {
+    console.log("test");
+
+    for (let i = 0; i < shape.boxes.length; i++) {
+        const { x, y } = shape.boxes[i];
+        let targetRow = document.getElementById(`y${y}`);
+        let targetBox = targetRow.children[x];
+
+        if (targetBox.classList.length !== 0) {
+            return false
+        }
+    }
+
     shapeCounter++
-    activeShape = eval(`new ${shape}(5, 0, ${shapeCounter})`);
+    shape.updateShapeId(shapeCounter);
+    activeShape = shape;
     userInput = true;
     userInput = await activeShape.shapeGravity(true);
     shapes.push(activeShape);
     await clearRows();
 
     await delay(500);
+
+    return true
 }
 
 const populateGrid = async () => {
@@ -44,7 +68,7 @@ const populateGrid = async () => {
         const section = document.createElement("section");
         section.setAttribute("id", `y${i}`);
 
-        document.getElementById("game-box").appendChild(section);
+        gameBoxEl.appendChild(section);
 
         for (let j = 0; j < 10; j++) {
             const div = document.createElement("div");
@@ -110,7 +134,7 @@ const clearRows = async () => {
 // Generate a bag of pieces in any order
 // Using each piece only once
 const bagGeneration = () => {
-    let pieces = ["I", "J", "L", "O", "S", "T", "Z"];
+    let pieces = [new I(5, 0), new J(5, 0), new L(5, 0), new O(5, 0), new S(5, 0), new T(5, 0), new Z(5, 0)];
     let bag = [];
 
     for (let i = 0; i < pieces.length; i++) {
@@ -127,6 +151,47 @@ const bagGeneration = () => {
     return bag.map(x => pieces[x])
 }
 
+const endGame = async () => {
+    userInput = false;
+    
+    await delay(250);
+
+    for (let i = 17; i > -1; i--) {
+        const row = document.getElementById(`y${i}`);
+
+        for (let j = 9; j > -1; j--) {
+            row.children[j].remove();
+            await delay(10)
+        }
+    }
+
+    for (let i = 0; i < 18; i++) {
+        document.getElementById(`y${i}`).remove();
+    }
+
+    await delay(250);
+
+    const gameOverElements = [document.createElement("h1"), document.createElement("p"), document.createElement("button")];
+
+    gameOverElements[0].textContent = "Game Over!";
+    gameOverElements[1].textContent = `Final Score: ${score}`;
+    gameOverElements[2].textContent = "Play Again?";
+
+    gameOverElements[2].addEventListener("click", () => {
+        gameBoxEl.removeAttribute("class");
+        for (let i = 0; i < gameOverElements.length; i++) {
+            gameBoxEl.removeChild(gameOverElements[i]);
+        }
+
+        return init();
+    });
+
+    for (let i = 0; i < gameOverElements.length; i++) {
+        gameBoxEl.appendChild(gameOverElements[i])
+    }
+    gameBoxEl.setAttribute("class", "end-game");
+}
+
 document.addEventListener("keydown", ({ key }) => {
     if (!userInput) {
         return
@@ -140,7 +205,7 @@ document.addEventListener("keydown", ({ key }) => {
 });
 
 document.getElementById("btn").addEventListener("click", () => {
-    document.getElementById("game-box").removeAttribute("class");
+    gameBoxEl.removeAttribute("class");
     document.getElementById("btn").setAttribute("class", "display-none");
     init();
 });
@@ -150,7 +215,8 @@ document.getElementById("btn").addEventListener("click", () => {
 // All tetrimino pieces - DONE
 // Piece generation - DONE
 // Rework line-clearing logic - DONE
-// End game
+// End game - DONE
+// Pause game when unfocus on screen
 // Wall kick when rotating
 // Hard drop w/ Up Arrow
 // Points
