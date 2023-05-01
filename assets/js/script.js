@@ -111,7 +111,7 @@ const shapeDrop = async () => {
     }
 
     while (hold && activeShape.canShapeMove("ArrowDown")) {
-        await delay(1000);
+        await delay(500);
 
         if (!hold) {
             return;
@@ -400,8 +400,8 @@ document.getElementById("btn").addEventListener("click", () => {
 // End game - DONE
 // Next Piece - DONE
 // Hold piece - DONE
-// Wall kick when rotating
-// Hard drop w/ Up Arrow
+// Wall kick when rotating - DONE
+// Hard drop w/ Up Arrow - DONE
 // Points
 // Speed Increase over time
 // UI

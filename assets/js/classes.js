@@ -119,6 +119,7 @@ class Shape {
                     this.boxes[i].y++
                     break;
                 default:
+                    this.hardDrop();
                     break;
             }
         }
@@ -215,6 +216,12 @@ class Shape {
         }
 
         return kickedPositions
+    }
+
+    hardDrop() {
+        while (this.canShapeMove("ArrowDown", [])) {
+            this.moveShape("ArrowDown");
+        }
     }
 }
 
