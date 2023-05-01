@@ -10,6 +10,7 @@ class Box {
     }
 
     updateDom(show, target) {
+
         const row = !target ? document.getElementById(`y${this.y}`) : document.getElementById(`${target}-y${this.y}`);
         const div = row.children[this.x];
         let classes = [this.color, "active"];
@@ -130,8 +131,16 @@ class Shape {
         this.populateShape(false);
 
         const newPositions = this.getRotatedPositions(num);
+        const outOfBounds = newPositions.filter(value => value.x < 0 || value.x > 9 || value.y < 0);
+        let positions;
 
-        if (this.canShapeMove("", newPositions)) {
+        if (outOfBounds.length !== 0) {
+            positions = this.wallKick(newPositions);
+        } else {
+            positions = newPositions;
+        }
+
+        if (this.canShapeMove("", positions)) {
 
             if (num == 1) {
                 if (this.position == 1) {
@@ -148,8 +157,8 @@ class Shape {
             }
 
             for (let i = 0; i < this.boxes.length; i++) {
-                this.boxes[i].x = newPositions[i].x
-                this.boxes[i].y = newPositions[i].y
+                this.boxes[i].x = positions[i].x
+                this.boxes[i].y = positions[i].y
             }
         }
 
@@ -170,6 +179,42 @@ class Shape {
         } else {
             return 1
         }
+    }
+
+    wallKick(newPositions) {
+        let xPositions = newPositions.map(value => value.x);
+        let yPositions = newPositions.map(value => value.y);
+        let kickType;
+        let kickedPositions;
+
+        // Right Kick
+        if (xPositions.some(num => num < 0)) {
+            kickType = "right"
+        }
+
+        // Left Kick
+        if (xPositions.some(num => num > 9)) {
+            kickType = "left"
+        }
+
+        // Down Kick
+        if (yPositions.some(num => num < 0)) {
+            kickType = "down"
+        }
+
+        switch (kickType) {
+            case "right":
+                kickedPositions = newPositions.map((value) => { return { x: value.x + 1, y: value.y } })
+                break;
+            case "left":
+                kickedPositions = newPositions.map((value) => { return { x: value.x - 1, y: value.y } })
+                break;
+            default:
+                kickedPositions = newPositions.map((value) => { return { x: value.x, y: value.y + 1 } })
+                break;
+        }
+
+        return kickedPositions
     }
 }
 

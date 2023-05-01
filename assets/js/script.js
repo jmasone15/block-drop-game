@@ -111,7 +111,7 @@ const shapeDrop = async () => {
     }
 
     while (hold && activeShape.canShapeMove("ArrowDown")) {
-        await delay(250);
+        await delay(1000);
 
         if (!hold) {
             return;
