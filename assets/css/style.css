@@ -60,6 +60,37 @@ div {
     color: white;
 }
 
+.active {
+    border-color: black;
+    border-style: solid;
+}
+
+.border-left {
+    border-left-width: 1px
+}
+.border-right {
+    border-right-width: 1px
+}
+.border-top {
+    border-top-width: 1px
+}
+.border-bottom {
+    border-bottom-width: 1px
+}
+
+.no-border-left {
+    border-left-width: 0px
+}
+.no-border-right {
+    border-right-width: 0px
+}
+.no-border-top {
+    border-top-width: 0px
+}
+.no-border-bottom {
+    border-bottom-width: 0px
+}
+
 article {
     display: flex;
     flex-direction: row;
@@ -91,10 +122,6 @@ aside {
 .text {
     margin-bottom: 0px;
     font-size: 30px;
-}
-
-.active {
-    border-color: red;
 }
 
 .red {

@@ -12,12 +12,13 @@ class Box {
     updateDom(show, target) {
         const row = !target ? document.getElementById(`y${this.y}`) : document.getElementById(`${target}-y${this.y}`);
         const div = row.children[this.x];
+        let classes = [this.color, "active"];
 
         if (show) {
-            div.classList.add(this.color);
+            div.classList.add(...classes);
             div.setAttribute("shapeId", this.shapeId);
         } else {
-            div.classList.remove(this.color);
+            div.classList.remove(...classes);
             div.removeAttribute("shapeId");
         }
     }
@@ -157,7 +158,7 @@ class Shape {
 
     updateShapeId(id) {
         this.shapeId = id
-        
+
         for (let i = 0; i < this.boxes.length; i++) {
             this.boxes[i].shapeId = this.shapeId
         }
@@ -307,7 +308,7 @@ class I extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y;
 
@@ -367,7 +368,7 @@ class J extends Shape {
 
                 case 3:
                     box0.y -= 2
-                    
+
                     box1.x--
                     box1.y--
 
@@ -440,7 +441,7 @@ class J extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y + 1;
 
@@ -574,7 +575,7 @@ class L extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y + 1;
 
@@ -614,7 +615,7 @@ class O extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y;
 
@@ -726,7 +727,7 @@ class S extends Shape {
                     box2.y--
 
                     box3.y -= 2
-                    
+
                     break;
 
                 default:
@@ -748,7 +749,7 @@ class S extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y + 1;
 
@@ -882,7 +883,7 @@ class T extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y + 1;
 
@@ -1008,7 +1009,7 @@ class Z extends Shape {
     resetShape(x, y) {
         this.x = x;
         this.y = y;
-        
+
         this.focalBox.x = x;
         this.focalBox.y = y + 1;
 

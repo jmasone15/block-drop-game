@@ -6,7 +6,7 @@ let allRows = [];
 let shapes = [];
 let score = 0;
 let holdPiece;
-let test = true;
+let hold = true;
 let hasSwappedHold = false;
 
 const gameBoxEl = document.getElementById("game-box");
@@ -63,7 +63,7 @@ const game = async () => {
         await shapeDrop();
         userInput = false;
 
-        if (!test) {
+        if (!hold) {
             // Reset Piece
             activeShape.populateShape(false);
             activeShape.resetShape(5, 0);
@@ -75,7 +75,7 @@ const game = async () => {
 
             holdPiece = activeShape;
             displayShape(activeShape.color, "hold");
-            test = true;
+            hold = true;
             hasSwappedHold = true;
 
             continue;
@@ -100,36 +100,36 @@ const game = async () => {
 }
 
 const shapeDrop = async () => {
-    if (!test) {
+    if (!hold) {
         return;
     }
 
     activeShape.populateShape(true);
 
-    if (!test) {
+    if (!hold) {
         return;
     }
 
-    while (test && activeShape.canShapeMove("ArrowDown")) {
+    while (hold && activeShape.canShapeMove("ArrowDown")) {
         await delay(250);
 
-        if (!test) {
+        if (!hold) {
             return;
         }
 
         if (activeShape.canShapeMove("ArrowDown")) {
             
-            if (!test) {
+            if (!hold) {
                 return;
             }
 
             activeShape.moveShape("ArrowDown");
 
-            if (!test) {
+            if (!hold) {
                 return;
             }
         } else {
-            if (!test) {
+            if (!hold) {
                 return;
             }
 
@@ -137,20 +137,20 @@ const shapeDrop = async () => {
         }
     }
 
-    if (!test) {
+    if (!hold) {
         return;
     }
 
     if (activeShape.canShapeMove("ArrowDown")) {
 
-        if (!test) {
+        if (!hold) {
             return;
         }
 
         return shapeDrop();
     } else {
 
-        if (!test) {
+        if (!hold) {
             return;
         }
 
@@ -381,7 +381,7 @@ document.addEventListener("keydown", (e) => {
     } else if (key === "Tab") {
         e.preventDefault();
         if (!hasSwappedHold) {
-            test = false;
+            hold = false;
         }
     }
 });
@@ -400,8 +400,6 @@ document.getElementById("btn").addEventListener("click", () => {
 // End game - DONE
 // Next Piece - DONE
 // Hold piece - DONE
-// Black border around blocks
-// Clear row from left to right
 // Wall kick when rotating
 // Hard drop w/ Up Arrow
 // Points
