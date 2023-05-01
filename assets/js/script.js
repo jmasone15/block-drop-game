@@ -6,6 +6,8 @@ let allRows = [];
 let shapes = [];
 let score = 0;
 let holdPiece;
+let test = true;
+let hasSwappedHold = false;
 
 const gameBoxEl = document.getElementById("game-box");
 const holdEl = document.getElementById("hold");
@@ -49,14 +51,37 @@ const game = async () => {
             break
         }
 
-        displayShape(i == 6 ? nextBag[0].color: currentBag[i + 1].color);
+        displayShape(i == 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
+
+        console.log(i == 6 ? nextBag[0] : currentBag[i + 1]);
 
         shapeCounter++
         shape.updateShapeId(shapeCounter);
         activeShape = shape;
+
         userInput = true;
-        userInput = await activeShape.shapeGravity(true);
+        await shapeDrop();
         userInput = false;
+
+        if (!test) {
+            // Reset Piece
+            activeShape.populateShape(false);
+            activeShape.resetShape(5, 0);
+
+            if (holdPiece) {
+                currentBag[i] = holdPiece;
+                i--;
+            }
+
+            holdPiece = activeShape;
+            displayShape(activeShape.color, "hold");
+            test = true;
+            hasSwappedHold = true;
+
+            continue;
+        }
+
+        hasSwappedHold = false;
         shapes.push(activeShape);
 
         await clearRows();
@@ -65,17 +90,82 @@ const game = async () => {
         // Last iteration requery bag generation.
         if (i == 6) {
             currentBag = nextBag;
+            console.log(currentBag);
             nextBag = bagGeneration();
-            i = 0;
+            i = -1;
         }
     }
 
     return endGame()
 }
 
-const displayShape = (color) => {
+const shapeDrop = async () => {
+    if (!test) {
+        return;
+    }
+
+    activeShape.populateShape(true);
+
+    if (!test) {
+        return;
+    }
+
+    while (test && activeShape.canShapeMove("ArrowDown")) {
+        await delay(250);
+
+        if (!test) {
+            return;
+        }
+
+        if (activeShape.canShapeMove("ArrowDown")) {
+            
+            if (!test) {
+                return;
+            }
+
+            activeShape.moveShape("ArrowDown");
+
+            if (!test) {
+                return;
+            }
+        } else {
+            if (!test) {
+                return;
+            }
+
+            break
+        }
+    }
+
+    if (!test) {
+        return;
+    }
+
+    if (activeShape.canShapeMove("ArrowDown")) {
+
+        if (!test) {
+            return;
+        }
+
+        return shapeDrop();
+    } else {
+
+        if (!test) {
+            return;
+        }
+
+        // Set the shape to the focal point
+        // Change this to be a method for each shape
+        let focalBoxIndex = activeShape.getFocalIndex();
+
+        activeShape.x = activeShape.boxes[focalBoxIndex].x
+        activeShape.y = activeShape.boxes[focalBoxIndex].y
+    }
+}
+
+const displayShape = (color, target) => {
     for (let i = 0; i < 5; i++) {
-        const section = document.getElementById(`small-y${i}`);
+        const section = document.getElementById(`${target}-y${i}`);
 
         for (let j = 0; j < section.children.length; j++) {
             section.children[j].setAttribute("class", "small-div");
@@ -86,7 +176,7 @@ const displayShape = (color) => {
 
     switch (color) {
         case "light-blue":
-            shape = new I(2, 2, 0);
+            shape = new I(2, 2);
             break;
         case "yellow":
             shape = new O(2, 1);
@@ -108,13 +198,14 @@ const displayShape = (color) => {
             break;
     }
 
-    shape.populateShape(true, true)
+    shape.populateShape(true, target)
 }
 
 const populateGrid = async () => {
 
     await delay(250)
 
+    // Main grid
     for (let i = 0; i < 18; i++) {
         const section = document.createElement("section");
         section.setAttribute("id", `y${i}`);
@@ -131,11 +222,26 @@ const populateGrid = async () => {
     holdEl.removeAttribute("class");
     nextEl.removeAttribute("class");
 
+    // Next Box
     for (let i = 0; i < 5; i++) {
         const section = document.createElement("article");
-        section.setAttribute("id", `small-y${i}`);
+        section.setAttribute("id", `next-y${i}`);
         section.setAttribute("class", `small-row`);
         nextPieceEl.appendChild(section);
+
+        for (let j = 0; j < 5; j++) {
+            const div = document.createElement("div");
+            div.setAttribute("class", "small-div");
+            section.appendChild(div);
+        }
+    }
+
+    // Hold Box
+    for (let i = 0; i < 5; i++) {
+        const section = document.createElement("article");
+        section.setAttribute("id", `hold-y${i}`);
+        section.setAttribute("class", `small-row`);
+        holdPieceEl.appendChild(section);
 
         for (let j = 0; j < 5; j++) {
             const div = document.createElement("div");
@@ -261,7 +367,9 @@ const endGame = async () => {
     gameBoxEl.setAttribute("class", "end-game");
 }
 
-document.addEventListener("keydown", ({ key }) => {
+document.addEventListener("keydown", (e) => {
+    let key = e.key;
+
     if (!userInput) {
         return
     }
@@ -270,6 +378,11 @@ document.addEventListener("keydown", ({ key }) => {
         activeShape.moveShape(key)
     } else if (key == 1 || key == 2) {
         activeShape.rotatePiece(key)
+    } else if (key === "Tab") {
+        e.preventDefault();
+        if (!hasSwappedHold) {
+            test = false;
+        }
     }
 });
 
@@ -286,7 +399,7 @@ document.getElementById("btn").addEventListener("click", () => {
 // Rework line-clearing logic - DONE
 // End game - DONE
 // Next Piece - DONE
-// Hold piece
+// Hold piece - DONE
 // Black border around blocks
 // Clear row from left to right
 // Wall kick when rotating

@@ -9,8 +9,8 @@ class Box {
         this.order = order;
     }
 
-    updateDom(show, isSmall) {
-        const row = isSmall ? document.getElementById(`small-y${this.y}`) : document.getElementById(`y${this.y}`);
+    updateDom(show, target) {
+        const row = !target ? document.getElementById(`y${this.y}`) : document.getElementById(`${target}-y${this.y}`);
         const div = row.children[this.x];
 
         if (show) {
@@ -155,45 +155,19 @@ class Shape {
         this.populateShape(true);
     }
 
-    async shapeGravity(initial) {
-        let initialVar = initial
-        if (initialVar) {
-            this.populateShape(true);
-        }
-
-        while (this.canShapeMove("ArrowDown")) {
-            if (initialVar) {
-                await delay(250)
-            } else {
-                initialVar = true
-            }
-            // User could reach bottom with arrow keys 
-            if (this.canShapeMove("ArrowDown")) {
-                this.moveShape("ArrowDown")
-            } else {
-                break
-            }
-        }
-
-        await delay(250)
-
-        // Give users a buffer window for moving or rotating pieces after the piece is blocked
-        if (this.canShapeMove("ArrowDown")) {
-            return this.shapeGravity(false);
-        } else {
-            // Set the shape to the focal point
-            this.x = this.boxes[2].x
-            this.y = this.boxes[2].y
-        }
-        
-        return false
-    }
-
     updateShapeId(id) {
         this.shapeId = id
         
         for (let i = 0; i < this.boxes.length; i++) {
             this.boxes[i].shapeId = this.shapeId
+        }
+    }
+
+    getFocalIndex() {
+        if (this.color === "light-blue" || this.color === "blue" || this.color === "magenta" || this.color === "red") {
+            return 2
+        } else {
+            return 1
         }
     }
 }
@@ -330,36 +304,21 @@ class I extends Shape {
         return [box0, box1, box2, box3]
     }
 
-    rotatePiece(num) {
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y;
 
-        this.populateShape(false);
+        this.boxes = [
+            new Box(x - 2, y, this.color, this.shapeId, 1),
+            new Box(x - 1, y, this.color, this.shapeId, 2),
+            this.focalBox,
+            new Box(x + 1, y, this.color, this.shapeId, 4)
+        ]
 
-        const newPositions = this.getRotatedPositions(num);
-
-        if (this.canShapeMove("", newPositions)) {
-
-            if (num == 1) {
-                if (this.position == 1) {
-                    this.position = 4
-                } else {
-                    this.position--
-                }
-            } else {
-                if (this.position == 4) {
-                    this.position = 1
-                } else {
-                    this.position++
-                }
-            }
-
-            for (let i = 0; i < this.boxes.length; i++) {
-                this.boxes[i].x = newPositions[i].x
-                this.boxes[i].y = newPositions[i].y
-            }
-        }
-
-
-        this.populateShape(true);
+        this.position = 1;
     }
 }
 
@@ -478,36 +437,21 @@ class J extends Shape {
         return [box0, box1, box2, box3]
     }
 
-    rotatePiece(num) {
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y + 1;
 
-        this.populateShape(false);
+        this.boxes = [
+            new Box(x - 1, y, this.color, this.shapeId, 1),
+            new Box(x - 1, y + 1, this.color, this.shapeId, 2),
+            this.focalBox,
+            new Box(x + 1, y + 1, this.color, this.shapeId, 3)
+        ]
 
-        const newPositions = this.getRotatedPositions(num);
-
-        if (this.canShapeMove("", newPositions)) {
-
-            if (num == 1) {
-                if (this.position == 1) {
-                    this.position = 4
-                } else {
-                    this.position--
-                }
-            } else {
-                if (this.position == 4) {
-                    this.position = 1
-                } else {
-                    this.position++
-                }
-            }
-
-            for (let i = 0; i < this.boxes.length; i++) {
-                this.boxes[i].x = newPositions[i].x
-                this.boxes[i].y = newPositions[i].y
-            }
-        }
-
-
-        this.populateShape(true);
+        this.position = 1;
     }
 }
 
@@ -626,6 +570,23 @@ class L extends Shape {
 
         return [box0, box1, box2, box3]
     }
+
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y + 1;
+
+        this.boxes = [
+            new Box(x - 1, y + 1, this.color, this.shapeId, 1),
+            this.focalBox,
+            new Box(x + 1, y + 1, this.color, this.shapeId, 3),
+            new Box(x + 1, y, this.color, this.shapeId, 4)
+        ]
+
+        this.position = 1;
+    }
 }
 
 class O extends Shape {
@@ -648,6 +609,23 @@ class O extends Shape {
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
         return [box0, box1, box2, box3]
+    }
+
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y;
+
+        this.boxes = [
+            new Box(x - 1, y, this.color, this.shapeId, 1),
+            this.focalBox,
+            new Box(x - 1, y + 1, this.color, this.shapeId, 3),
+            new Box(x, y + 1, this.color, this.shapeId, 4)
+        ]
+
+        this.position = 1;
     }
 }
 
@@ -766,6 +744,23 @@ class S extends Shape {
 
         return [box0, box1, box2, box3]
     }
+
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y + 1;
+
+        this.boxes = [
+            new Box(x - 1, y + 1, this.color, this.shapeId, 1),
+            this.focalBox,
+            new Box(x, y, this.color, this.shapeId, 3),
+            new Box(x + 1, y, this.color, this.shapeId, 4)
+        ]
+
+        this.position = 1;
+    }
 }
 
 class T extends Shape {
@@ -883,6 +878,23 @@ class T extends Shape {
 
         return [box0, box1, box2, box3]
     }
+
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y + 1;
+
+        this.boxes = [
+            new Box(x - 1, y + 1, this.color, this.shapeId, 1),
+            new Box(x, y, this.color, this.shapeId, 2),
+            this.focalBox,
+            new Box(x + 1, y + 1, this.color, this.shapeId, 4)
+        ]
+
+        this.position = 1;
+    }
 }
 
 class Z extends Shape {
@@ -991,5 +1003,22 @@ class Z extends Shape {
         }
 
         return [box0, box1, box2, box3]
+    }
+
+    resetShape(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.focalBox.x = x;
+        this.focalBox.y = y + 1;
+
+        this.boxes = [
+            new Box(x - 1, y, this.color, this.shapeId, 1),
+            new Box(x, y, this.color, this.shapeId, 2),
+            this.focalBox,
+            new Box(x + 1, y + 1, this.color, this.shapeId, 4)
+        ]
+
+        this.position = 1;
     }
 }
