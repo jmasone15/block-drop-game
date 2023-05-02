@@ -39,11 +39,17 @@ button:hover {
 }
 
 main {
-    margin: 100px 0;
+    margin: 25px 0;
     border: 3px solid black;
     height: 75vh;
     width: 600px;
     height: 1080px;
+}
+
+h3 {
+    text-align: center;
+    margin-bottom: 0;
+    font-size: 30px;
 }
 
 section {

@@ -8,12 +8,16 @@ let score = 0;
 let holdPiece;
 let hold = true;
 let hasSwappedHold = false;
+let level = 0;
+let clearedLinesCount = 0;
+let speedMS = 1000;
 
 const gameBoxEl = document.getElementById("game-box");
 const holdEl = document.getElementById("hold");
 const nextEl = document.getElementById("next");
 const nextPieceEl = document.getElementById("next-piece");
 const holdPieceEl = document.getElementById("hold-piece");
+const levelEl = document.getElementById("level");
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -53,8 +57,6 @@ const game = async () => {
 
         displayShape(i == 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
 
-        console.log(i == 6 ? nextBag[0] : currentBag[i + 1]);
-
         shapeCounter++
         shape.updateShapeId(shapeCounter);
         activeShape = shape;
@@ -85,12 +87,11 @@ const game = async () => {
         shapes.push(activeShape);
 
         await clearRows();
-        await delay(500);
+        await delay(speedMS);
 
         // Last iteration requery bag generation.
         if (i == 6) {
             currentBag = nextBag;
-            console.log(currentBag);
             nextBag = bagGeneration();
             i = -1;
         }
@@ -111,14 +112,14 @@ const shapeDrop = async () => {
     }
 
     while (hold && activeShape.canShapeMove("ArrowDown")) {
-        await delay(500);
+        await delay(speedMS);
 
         if (!hold) {
             return;
         }
 
         if (activeShape.canShapeMove("ArrowDown")) {
-            
+
             if (!hold) {
                 return;
             }
@@ -203,7 +204,7 @@ const displayShape = (color, target) => {
 
 const populateGrid = async () => {
 
-    await delay(250)
+    await delay(250);
 
     // Main grid
     for (let i = 0; i < 18; i++) {
@@ -276,6 +277,7 @@ const clearRows = async () => {
 
     // Update every shape on the page to move down but still keep it's form
     if (clearedRows.length > 0) {
+        clearedLinesCount += clearedRows.length;
 
         await delay(500)
 
@@ -301,6 +303,8 @@ const clearRows = async () => {
                 });
             });
         }
+
+        updateLevel();
     }
 }
 
@@ -320,6 +324,62 @@ const bagGeneration = () => {
     }
 
     return bag.map(x => pieces[x])
+}
+
+const updateLevel = () => {
+    const lineTarget = Math.min(100, (level * 1) + 1);
+
+    if (clearedLinesCount >= lineTarget) {
+        level++
+
+        switch (level) {
+            case 1:
+                speedMS = 800;
+                break;
+            case 2:
+                speedMS = 717;
+                break;
+            case 3:
+                speedMS = 550;
+                break;
+            case 4:
+                speedMS = 470;
+                break;
+            case 5:
+                speedMS = 384;
+                break;
+            case 6:
+                speedMS = 300;
+                break;
+            case 7:
+                speedMS = 217;
+                break;
+            case 8:
+                speedMS = 134;
+                break;
+            case 9:
+                speedMS = 100;
+                break;
+            default:
+                break;
+        }
+
+        if (level > 9 && level < 13) {
+            speedMS = 84;
+        } else if (level > 12 && level < 16) {
+            speedMS = 64;
+        } else if (level > 15 && level < 19) {
+            speedMS = 50;
+        } else if (level > 18 && level < 29) {
+            speedMS = 33;
+        } else if (level > 28) {
+            speedMS = 17;
+        }
+
+        levelEl.textContent = `Level: ${level}`
+    }
+
+    return;
 }
 
 const endGame = async () => {
@@ -388,6 +448,7 @@ document.addEventListener("keydown", (e) => {
 
 document.getElementById("btn").addEventListener("click", () => {
     gameBoxEl.removeAttribute("class");
+    levelEl.removeAttribute("class");
     document.getElementById("btn").setAttribute("class", "display-none");
     init();
 });
@@ -402,6 +463,9 @@ document.getElementById("btn").addEventListener("click", () => {
 // Hold piece - DONE
 // Wall kick when rotating - DONE
 // Hard drop w/ Up Arrow - DONE
+// Levels - DONE
+// Speed Increase over time - DONE
 // Points
-// Speed Increase over time
+// Timeout when setting piece
 // UI
+// Control manager
