@@ -98,13 +98,14 @@ class Shape {
         return boxesCanMove.length == this.boxes.length
     }
 
-    moveShape(direction) {
+    moveShape(direction, user) {
+        let count = 0;
 
         this.populateShape(false);
 
         if (!this.canShapeMove(direction, [])) {
             this.populateShape(true);
-            return
+            return 0;
         }
 
         for (let i = 0; i < this.boxes.length; i++) {
@@ -119,12 +120,21 @@ class Shape {
                     this.boxes[i].y++
                     break;
                 default:
-                    this.hardDrop();
+                    count += this.hardDrop();
                     break;
             }
         }
 
+
         this.populateShape(true);
+
+        if (direction === "ArrowUp") {
+            return count * 2;
+        } else if (user && direction === "ArrowDown") {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     rotatePiece(num) {
@@ -219,9 +229,13 @@ class Shape {
     }
 
     hardDrop() {
+        let iteration = 0;
         while (this.canShapeMove("ArrowDown", [])) {
             this.moveShape("ArrowDown");
+            iteration++
         }
+
+        return iteration
     }
 }
 

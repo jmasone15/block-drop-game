@@ -17,15 +17,19 @@ const holdEl = document.getElementById("hold");
 const nextEl = document.getElementById("next");
 const nextPieceEl = document.getElementById("next-piece");
 const holdPieceEl = document.getElementById("hold-piece");
+const h3El = document.getElementById("h3");
 const levelEl = document.getElementById("level");
+const scoreEl = document.getElementById("score");
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const init = async () => {
-    await populateGrid();
 
+    // Populate UI
+    await populateGrid();
     await delay(1000);
 
+    // Game loop
     return game();
 }
 
@@ -124,7 +128,7 @@ const shapeDrop = async () => {
                 return;
             }
 
-            activeShape.moveShape("ArrowDown");
+            activeShape.moveShape("ArrowDown", false);
 
             if (!hold) {
                 return;
@@ -223,31 +227,26 @@ const populateGrid = async () => {
     holdEl.removeAttribute("class");
     nextEl.removeAttribute("class");
 
-    // Next Box
+    // Next and Hold Box
     for (let i = 0; i < 5; i++) {
-        const section = document.createElement("article");
-        section.setAttribute("id", `next-y${i}`);
-        section.setAttribute("class", `small-row`);
-        nextPieceEl.appendChild(section);
+        const sectionOne = document.createElement("article");
+        sectionOne.setAttribute("id", `next-y${i}`);
+        sectionOne.setAttribute("class", `small-row`);
+        nextPieceEl.appendChild(sectionOne);
+
+        const sectionTwo = document.createElement("article");
+        sectionTwo.setAttribute("id", `hold-y${i}`);
+        sectionTwo.setAttribute("class", `small-row`);
+        holdPieceEl.appendChild(sectionTwo);
 
         for (let j = 0; j < 5; j++) {
-            const div = document.createElement("div");
-            div.setAttribute("class", "small-div");
-            section.appendChild(div);
-        }
-    }
+            const divOne = document.createElement("div");
+            divOne.setAttribute("class", "small-div");
+            sectionOne.appendChild(divOne);
 
-    // Hold Box
-    for (let i = 0; i < 5; i++) {
-        const section = document.createElement("article");
-        section.setAttribute("id", `hold-y${i}`);
-        section.setAttribute("class", `small-row`);
-        holdPieceEl.appendChild(section);
-
-        for (let j = 0; j < 5; j++) {
-            const div = document.createElement("div");
-            div.setAttribute("class", "small-div");
-            section.appendChild(div);
+            const divTwo = document.createElement("div");
+            divTwo.setAttribute("class", "small-div");
+            sectionTwo.appendChild(divTwo);
         }
     }
 
@@ -304,6 +303,29 @@ const clearRows = async () => {
             });
         }
 
+        let modifier = 0;
+        let levelMod = level;
+        switch (clearedRows.length) {
+            case 4:
+                modifier = 800
+                break;
+            case 3:
+                modifier = 500
+                break;
+            case 2:
+                modifier = 300
+                break;
+            default:
+                modifier = 100
+                break;
+        }
+
+        if (level == 0) {
+            levelMod = 1
+        }
+
+        score += modifier * levelMod;
+        scoreEl.textContent = `Score: ${score}`
         updateLevel();
     }
 }
@@ -400,6 +422,21 @@ const endGame = async () => {
         document.getElementById(`y${i}`).remove();
     }
 
+    for (let i = 4; i > -1; i--) {
+        const rowOne = document.getElementById(`next-y${i}`);
+        const rowTwo = document.getElementById(`hold-y${i}`);
+
+        console.log(rowOne);
+
+        for (let j = 4; j > -1; j--) {
+            rowOne.children[j].remove();
+            rowTwo.children[j].remove();
+        }
+
+        rowOne.remove();
+        rowTwo.remove();
+    }
+
     await delay(250);
 
     const gameOverElements = [document.createElement("h1"), document.createElement("p"), document.createElement("button")];
@@ -417,6 +454,11 @@ const endGame = async () => {
         shapes = [];
         shapeCounter = 0;
         score = 0;
+        allRows = [];
+        holdPiece = null;
+        level = 0;
+        clearedLinesCount = 0;
+        speedMS = 1000;
 
         return init();
     });
@@ -435,20 +477,27 @@ document.addEventListener("keydown", (e) => {
     }
 
     if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowDown" || key === "ArrowUp") {
-        activeShape.moveShape(key)
+        const totalRows = activeShape.moveShape(key, true);
+
+        if (totalRows !== 0) {
+            score += totalRows
+            scoreEl.textContent = `Score: ${score}`
+        }
+
     } else if (key == 1 || key == 2) {
         activeShape.rotatePiece(key)
     } else if (key === "Tab") {
         e.preventDefault();
         if (!hasSwappedHold) {
             hold = false;
+            userInput = false;
         }
     }
 });
 
 document.getElementById("btn").addEventListener("click", () => {
     gameBoxEl.removeAttribute("class");
-    levelEl.removeAttribute("class");
+    h3El.removeAttribute("class");
     document.getElementById("btn").setAttribute("class", "display-none");
     init();
 });
@@ -465,7 +514,7 @@ document.getElementById("btn").addEventListener("click", () => {
 // Hard drop w/ Up Arrow - DONE
 // Levels - DONE
 // Speed Increase over time - DONE
-// Points
+// Points - DONE
 // Timeout when setting piece
 // UI
 // Control manager
