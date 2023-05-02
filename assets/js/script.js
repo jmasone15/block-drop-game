@@ -11,6 +11,8 @@ let hasSwappedHold = false;
 let level = 0;
 let clearedLinesCount = 0;
 let speedMS = 1000;
+let loopCount = 0;
+let incrementLoopCount = false;
 
 const gameBoxEl = document.getElementById("game-box");
 const holdEl = document.getElementById("hold");
@@ -64,10 +66,7 @@ const game = async () => {
         shapeCounter++
         shape.updateShapeId(shapeCounter);
         activeShape = shape;
-
-        userInput = true;
         await shapeDrop();
-        userInput = false;
 
         if (!hold) {
             // Reset Piece
@@ -105,67 +104,57 @@ const game = async () => {
 }
 
 const shapeDrop = async () => {
-    if (!hold) {
-        return;
-    }
-
     activeShape.populateShape(true);
-
-    if (!hold) {
-        return;
-    }
+    userInput = true;
+    loopCount = 1;
 
     while (hold && activeShape.canShapeMove("ArrowDown")) {
-        await delay(speedMS);
 
-        if (!hold) {
-            return;
+        // When holding a piece, there is a big delay if the speedMS is too high.
+        // Split speedMS into quarters and check the hold after each one.
+        if (speedMS > 100) {
+            let quarterSpeed = Math.floor(speedMS / 4);
+
+            for (let i = 0; i < 4; i++) {
+                await delay(quarterSpeed);
+                if (!hold) {
+                    return;
+                }
+            }
+        } else {
+            await delay(speedMS);
+            if (!hold) {
+                return;
+            }
         }
 
         if (activeShape.canShapeMove("ArrowDown")) {
-
-            if (!hold) {
-                return;
-            }
-
             activeShape.moveShape("ArrowDown", false);
-
-            if (!hold) {
-                return;
-            }
         } else {
-            if (!hold) {
-                return;
-            }
-
             break
         }
     }
 
-    if (!hold) {
-        return;
+    // Give users a max of 1000 ms to rotate and move block around once it hits the bottom possible space.
+    let count = 0;
+    incrementLoopCount = true;
+    while (count <= loopCount && loopCount !== 0) {
+        await delay(250);
+        console.log(count, loopCount);
+        if (activeShape.canShapeMove("ArrowDown")) {
+            return shapeDrop();
+        }
+        count++
     }
 
-    if (activeShape.canShapeMove("ArrowDown")) {
+    // Set the shape to the focal point
+    // Change this to be a method for each shape
+    userInput = false;
+    incrementLoopCount = false;
+    let focalBoxIndex = activeShape.getFocalIndex();
 
-        if (!hold) {
-            return;
-        }
-
-        return shapeDrop();
-    } else {
-
-        if (!hold) {
-            return;
-        }
-
-        // Set the shape to the focal point
-        // Change this to be a method for each shape
-        let focalBoxIndex = activeShape.getFocalIndex();
-
-        activeShape.x = activeShape.boxes[focalBoxIndex].x
-        activeShape.y = activeShape.boxes[focalBoxIndex].y
-    }
+    activeShape.x = activeShape.boxes[focalBoxIndex].x
+    activeShape.y = activeShape.boxes[focalBoxIndex].y
 }
 
 const displayShape = (color, target) => {
@@ -479,6 +468,13 @@ document.addEventListener("keydown", (e) => {
     if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowDown" || key === "ArrowUp") {
         const totalRows = activeShape.moveShape(key, true);
 
+        if (key === "ArrowUp") {
+            loopCount = 0
+        } else if (incrementLoopCount && loopCount < 4) {
+            console.log("increment");
+            loopCount++
+        }
+
         if (totalRows !== 0) {
             score += totalRows
             scoreEl.textContent = `Score: ${score}`
@@ -515,6 +511,6 @@ document.getElementById("btn").addEventListener("click", () => {
 // Levels - DONE
 // Speed Increase over time - DONE
 // Points - DONE
-// Timeout when setting piece
-// UI
+// Timeout when setting piece - DONE
 // Control manager
+// UI
