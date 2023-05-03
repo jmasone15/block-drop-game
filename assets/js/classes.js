@@ -30,13 +30,13 @@ class Box {
 
         if (!targetX || !targetY) {
             switch (direction) {
-                case "ArrowLeft":
+                case controlsData.leftMoveKey:
                     x--
                     break;
-                case "ArrowRight":
+                case controlsData.rightMoveKey:
                     x++
                     break;
-                case "ArrowDown":
+                case controlsData.softDropKey:
                     y++
                     break;
                 default:
@@ -110,13 +110,13 @@ class Shape {
 
         for (let i = 0; i < this.boxes.length; i++) {
             switch (direction) {
-                case "ArrowLeft":
+                case controlsData.leftMoveKey:
                     this.boxes[i].x--
                     break;
-                case "ArrowRight":
+                case controlsData.rightMoveKey:
                     this.boxes[i].x++
                     break;
-                case "ArrowDown":
+                case controlsData.softDropKey:
                     this.boxes[i].y++
                     break;
                 default:
@@ -128,9 +128,9 @@ class Shape {
 
         this.populateShape(true);
 
-        if (direction === "ArrowUp") {
+        if (direction === controlsData.hardDropKey) {
             return count * 2;
-        } else if (user && direction === "ArrowDown") {
+        } else if (user && direction === controlsData.softDropKey) {
             return 1;
         } else {
             return 0;
@@ -230,8 +230,8 @@ class Shape {
 
     hardDrop() {
         let iteration = 0;
-        while (this.canShapeMove("ArrowDown", [])) {
-            this.moveShape("ArrowDown");
+        while (this.canShapeMove(controlsData.softDropKey, [])) {
+            this.moveShape(controlsData.softDropKey);
             iteration++
         }
 

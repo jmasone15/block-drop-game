@@ -1,3 +1,4 @@
+// Game Variables
 let userInput = false;
 let activeShape;
 let shapeCounter = 0;
@@ -13,7 +14,11 @@ let clearedLinesCount = 0;
 let speedMS = 1000;
 let loopCount = 0;
 let incrementLoopCount = false;
+let controlsData = JSON.parse(localStorage.getItem("blockGameControls"));
+let changeControls = false;
+let targetControlChange;
 
+// HTML Elements
 const gameBoxEl = document.getElementById("game-box");
 const holdEl = document.getElementById("hold");
 const nextEl = document.getElementById("next");
@@ -22,6 +27,23 @@ const holdPieceEl = document.getElementById("hold-piece");
 const h3El = document.getElementById("h3");
 const levelEl = document.getElementById("level");
 const scoreEl = document.getElementById("score");
+const startBtnEl = document.getElementById("btn");
+const controlsEl = document.getElementById("controls");
+const controlsBoxEl = document.getElementById("controls-box");
+const modal = document.getElementById("modal");
+
+if (!controlsData) {
+    controlsData = {
+        leftMoveKey: "ArrowLeft",
+        rightMoveKey: "ArrowRight",
+        softDropKey: "ArrowDown",
+        hardDropKey: "ArrowUp",
+        holdPieceKey: "Tab",
+        leftRotateKey: "1",
+        rightRotateKey: "2"
+    }
+    localStorage.setItem("blockGameControls", JSON.stringify(controlsData));
+}
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -108,7 +130,7 @@ const shapeDrop = async () => {
     userInput = true;
     loopCount = 1;
 
-    while (hold && activeShape.canShapeMove("ArrowDown")) {
+    while (hold && activeShape.canShapeMove(controlsData.softDropKey)) {
 
         // When holding a piece, there is a big delay if the speedMS is too high.
         // Split speedMS into quarters and check the hold after each one.
@@ -128,8 +150,8 @@ const shapeDrop = async () => {
             }
         }
 
-        if (activeShape.canShapeMove("ArrowDown")) {
-            activeShape.moveShape("ArrowDown", false);
+        if (activeShape.canShapeMove(controlsData.softDropKey)) {
+            activeShape.moveShape(controlsData.softDropKey, false);
         } else {
             break
         }
@@ -140,8 +162,7 @@ const shapeDrop = async () => {
     incrementLoopCount = true;
     while (count <= loopCount && loopCount !== 0) {
         await delay(250);
-        console.log(count, loopCount);
-        if (activeShape.canShapeMove("ArrowDown")) {
+        if (activeShape.canShapeMove(controlsData.softDropKey)) {
             return shapeDrop();
         }
         count++
@@ -415,8 +436,6 @@ const endGame = async () => {
         const rowOne = document.getElementById(`next-y${i}`);
         const rowTwo = document.getElementById(`hold-y${i}`);
 
-        console.log(rowOne);
-
         for (let j = 4; j > -1; j--) {
             rowOne.children[j].remove();
             rowTwo.children[j].remove();
@@ -458,20 +477,117 @@ const endGame = async () => {
     gameBoxEl.setAttribute("class", "end-game");
 }
 
+const populateControlsBox = () => {
+    for (let i = 0; i < 7; i++) {
+        const controlSection = document.createElement("section");
+        const controlP = document.createElement("p");
+        const controlSpan = document.createElement("p");
+        const controlButton = document.createElement("button");
+        if (i !== 6) {
+            controlSection.setAttribute("class", "border-bottom-dashed");
+        }
+
+        controlButton.textContent = "Change";
+
+        switch (i) {
+            case 0:
+                controlP.innerHTML = "<b>Left Move:</b>";
+                controlSpan.textContent = controlsData.leftMoveKey;
+                controlSpan.setAttribute("id", "leftMoveKey");
+                break;
+            case 1:
+                controlP.innerHTML = "<b>Right Move:</b>";
+                controlSpan.textContent = controlsData.rightMoveKey;
+                controlSpan.setAttribute("id", "rightMoveKey");
+                break;
+            case 2:
+                controlP.innerHTML = "<b>Soft Drop:</b>";
+                controlSpan.textContent = controlsData.softDropKey;
+                controlSpan.setAttribute("id", "softDropKey");
+                break;
+            case 3:
+                controlP.innerHTML = "<b>Hard Drop:</b>";
+                controlSpan.textContent = controlsData.hardDropKey;
+                controlSpan.setAttribute("id", "hardDropKey");
+                break;
+            case 4:
+                controlP.innerHTML = "<b>Left Rotate:</b>";
+                controlSpan.textContent = controlsData.leftRotateKey;
+                controlSpan.setAttribute("id", "leftRotateKey");
+                break;
+            case 5:
+                controlP.innerHTML = "<b>Right Rotate:</b>";
+                controlSpan.textContent = controlsData.rightRotateKey;
+                controlSpan.setAttribute("id", "rightRotateKey");
+                break;
+            default:
+                controlP.innerHTML = "<b>Hold Piece:</b>";
+                controlSpan.textContent = controlsData.holdPieceKey;
+                controlSpan.setAttribute("id", "holdPieceKey");
+                break;
+        }
+
+        controlsBoxEl.appendChild(controlSection);
+        controlSection.appendChild(controlP);
+        controlSection.appendChild(controlSpan);
+        controlSection.appendChild(controlButton);
+
+        controlButton.addEventListener("click", changeControlKey)
+    }
+}
+
+const changeControlKey = (event) => {
+    const controlTarget = event.target.previousElementSibling.previousElementSibling.textContent;
+    modal.style.display = "block";
+
+    switch (controlTarget) {
+        case "Left Move:":
+            targetControlChange = "leftMoveKey";
+            break;
+        case "Right Move:":
+            targetControlChange = "rightMoveKey";
+            break;
+        case "Soft Drop:":
+            targetControlChange = "softDropKey";
+            break;
+        case "Hard Drop:":
+            targetControlChange = "hardDropKey";
+            break;
+        case "Left Rotate:":
+            targetControlChange = "leftRotateKey";
+            break;
+        case "Right Rotate:":
+            targetControlChange = "rightRotateKey";
+            break;
+        default:
+            targetControlChange = "holdPieceKey";
+            break;
+    }
+
+}
+
 document.addEventListener("keydown", (e) => {
-    let key = e.key;
+    let key = e.key === " " ? "Space" : e.key;
+    console.log(key);
+
+    if (modal.style.display = "block") {
+        e.preventDefault();
+        controlsData[targetControlChange] = key;
+        document.getElementById(targetControlChange).textContent = key;
+        localStorage.setItem("blockGameControls", JSON.stringify(controlsData));
+        modal.style.display = "none";
+    }
 
     if (!userInput) {
         return
     }
 
-    if (key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowDown" || key === "ArrowUp") {
+    if (key === controlsData.leftMoveKey || key === controlsData.rightMoveKey || key === controlsData.softDropKey || key === controlsData.hardDropKey) {
         const totalRows = activeShape.moveShape(key, true);
 
         if (key === "ArrowUp") {
             loopCount = 0
         } else if (incrementLoopCount && loopCount < 4) {
-            console.log("increment");
             loopCount++
         }
 
@@ -480,9 +596,11 @@ document.addEventListener("keydown", (e) => {
             scoreEl.textContent = `Score: ${score}`
         }
 
-    } else if (key == 1 || key == 2) {
-        activeShape.rotatePiece(key)
-    } else if (key === "Tab") {
+    } else if (key == controlsData.leftRotateKey) {
+        activeShape.rotatePiece(1);
+    } else if(key == controlsData.rightRotateKey) {
+        activeShape.rotatePiece(2);
+    } else if (key === controlsData.holdPieceKey) {
         e.preventDefault();
         if (!hasSwappedHold) {
             hold = false;
@@ -490,12 +608,34 @@ document.addEventListener("keydown", (e) => {
         }
     }
 });
-
-document.getElementById("btn").addEventListener("click", () => {
+startBtnEl.addEventListener("click", () => {
     gameBoxEl.removeAttribute("class");
     h3El.removeAttribute("class");
-    document.getElementById("btn").setAttribute("class", "display-none");
+    startBtnEl.setAttribute("class", "display-none");
+    controlsEl.setAttribute("class", "display-none");
     init();
+});
+controlsEl.addEventListener("click", () => {
+    if (changeControls) {
+        controlsEl.textContent = "Controls";
+        startBtnEl.classList.remove("display-none");
+        controlsBoxEl.classList.add("display-none");
+        changeControls = false;
+    } else {
+        controlsEl.textContent = "Go Back";
+        startBtnEl.classList.add("display-none");
+        controlsBoxEl.classList.remove("display-none");
+        changeControls = true;
+
+        if (document.getElementById("leftMoveKey") === null) {
+            populateControlsBox();
+        }
+    }
+});
+window.addEventListener("click", (e) => {
+    if (e.target == modal) {
+        modal.style.display = "none";
+    }
 });
 
 
@@ -512,5 +652,6 @@ document.getElementById("btn").addEventListener("click", () => {
 // Speed Increase over time - DONE
 // Points - DONE
 // Timeout when setting piece - DONE
-// Control manager
+// Control manager - DONE
+// Comment and Refactor
 // UI
