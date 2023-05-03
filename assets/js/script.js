@@ -124,17 +124,10 @@ const shapeDrop = async () => {
 
         // When holding a piece, there is a big delay if the speedMS is too high.
         // Split speedMS into quarters and check the hold after each one.
-        if (speedMS > 100) {
-            let quarterSpeed = Math.floor(speedMS / 4);
+        let quarterSpeed = Math.floor(speedMS / 4);
 
-            for (let i = 0; i < 4; i++) {
-                await delay(quarterSpeed);
-                if (!hold) {
-                    return;
-                }
-            }
-        } else {
-            await delay(speedMS);
+        for (let i = 0; i < 4; i++) {
+            await delay(quarterSpeed);
             if (!hold) {
                 return;
             }
@@ -260,6 +253,7 @@ const clearRows = async () => {
         const childDivs = Array.from(allRows[i].children);
 
         // If row is full
+        // might be better with an every method
         if (childDivs.filter(div => div.classList.length !== 0).length == 10) {
 
             clearedRows.push(i);
@@ -278,7 +272,7 @@ const clearRows = async () => {
     if (clearedRows.length > 0) {
         clearedLinesCount += clearedRows.length;
 
-        await delay(500)
+        await delay(250)
 
         shapes.forEach(shape => {
             const filteredBoxes = shape.boxes.filter(box => !clearedRows.includes(box.y));
@@ -291,16 +285,27 @@ const clearRows = async () => {
 
         shapes = filteredShapes
 
-        for (let i = Math.min(...clearedRows); i > -1; i--) {
-            shapes.forEach(({ boxes }) => {
-                boxes.forEach((box) => {
-                    if (box.y == i) {
-                        box.updateDom(false);
-                        box.y += clearedRows.length;
-                        box.updateDom(true);
-                    }
+
+        // Loop over all rows in reverse order (except the bottom one)
+        for (let i = 16; i > -1; i--) {
+            // If the row loop is a cleared row, skip.
+            if (clearedRows.includes(i)) {
+                continue
+            } else {
+                // For each box on the board, we want to drop it the appropriate amount based on lines cleared.
+                shapes.forEach(({ boxes }) => {
+                    boxes.forEach((box) => {
+                        if (box.y == i) {
+                            // Drop the box based on how many lines were cleared below it.
+                            let dropAmount = clearedRows.filter(num => num > i).length;
+
+                            box.updateDom(false);
+                            box.y += dropAmount;
+                            box.updateDom(true);
+                        }
+                    });
                 });
-            });
+            }
         }
 
         let modifier = 0;
@@ -566,7 +571,7 @@ document.addEventListener("keydown", (e) => {
         localStorage.setItem("blockGameControls", JSON.stringify(controlsData));
         modal.style.display = "none";
     }
-    
+
     if (!userInput) {
         return
     }
