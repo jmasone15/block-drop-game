@@ -2,7 +2,6 @@
 let userInput = false;
 let activeShape;
 let shapeCounter = 0;
-let gameActive = false;
 let allRows = [];
 let shapes = [];
 let score = 0;
@@ -58,8 +57,6 @@ const init = async () => {
 }
 
 const game = async () => {
-    gameActive = true;
-
     // Want to generate current bag and next bag to display pieces in "Next" box
     let currentBag = bagGeneration();
     let nextBag = bagGeneration();
@@ -74,13 +71,8 @@ const game = async () => {
             let targetBox = targetRow.children[x];
 
             if (targetBox.classList.length !== 0) {
-                gameActive = false
-                break
+                return endGame();
             }
-        }
-
-        if (!gameActive) {
-            break
         }
 
         displayShape(i == 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
@@ -121,8 +113,6 @@ const game = async () => {
             i = -1;
         }
     }
-
-    return endGame()
 }
 
 const shapeDrop = async () => {
@@ -568,16 +558,15 @@ const changeControlKey = (event) => {
 
 document.addEventListener("keydown", (e) => {
     let key = e.key === " " ? "Space" : e.key;
-    console.log(key);
 
-    if (modal.style.display = "block") {
+    if (modal.style.display === "block") {
         e.preventDefault();
         controlsData[targetControlChange] = key;
         document.getElementById(targetControlChange).textContent = key;
         localStorage.setItem("blockGameControls", JSON.stringify(controlsData));
         modal.style.display = "none";
     }
-
+    
     if (!userInput) {
         return
     }
@@ -598,7 +587,7 @@ document.addEventListener("keydown", (e) => {
 
     } else if (key == controlsData.leftRotateKey) {
         activeShape.rotatePiece(1);
-    } else if(key == controlsData.rightRotateKey) {
+    } else if (key == controlsData.rightRotateKey) {
         activeShape.rotatePiece(2);
     } else if (key === controlsData.holdPieceKey) {
         e.preventDefault();
@@ -637,21 +626,3 @@ window.addEventListener("click", (e) => {
         modal.style.display = "none";
     }
 });
-
-
-// TODO
-// All tetrimino pieces - DONE
-// Piece generation - DONE
-// Rework line-clearing logic - DONE
-// End game - DONE
-// Next Piece - DONE
-// Hold piece - DONE
-// Wall kick when rotating - DONE
-// Hard drop w/ Up Arrow - DONE
-// Levels - DONE
-// Speed Increase over time - DONE
-// Points - DONE
-// Timeout when setting piece - DONE
-// Control manager - DONE
-// Comment and Refactor
-// UI

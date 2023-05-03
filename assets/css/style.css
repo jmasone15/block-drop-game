@@ -29,21 +29,10 @@ body {
 
 #btn {
     margin: 100px 0;
-    font-size: 40px;
+    font-size: 30px;
     padding: 20px;
-    width: 200px;
-    color: white;
-    background-color: #cc00ff;
-    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
-
-
-#btn:hover {
-    background-color: rgb(255, 253, 253);
-    color: #cc00ff;
-    transform: scale(1.02);
+    border-radius: 8px;
 }
 
 main {
