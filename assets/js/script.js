@@ -104,7 +104,6 @@ const game = async () => {
         shapes.push(activeShape);
 
         await clearRows();
-        await delay(speedMS);
 
         // Last iteration requery bag generation.
         if (i == 6) {
@@ -141,11 +140,15 @@ const shapeDrop = async () => {
     }
 
     // Give users a max of 1000 ms to rotate and move block around once it hits the bottom possible space.
+    // Need to rework this
     let count = 0;
     incrementLoopCount = true;
     while (count <= loopCount && loopCount !== 0) {
         await delay(250);
         if (activeShape.canShapeMove(controlsData.softDropKey)) {
+            if (!hold) {
+                return;
+            }
             return shapeDrop();
         }
         count++
@@ -335,6 +338,7 @@ const clearRows = async () => {
     }
 }
 
+// Currently really slow, rework this
 const bagGeneration = () => {
     let pieces = [new I(5, 0), new J(5, 0), new L(5, 0), new O(5, 0), new S(5, 0), new T(5, 0), new Z(5, 0)];
     let bag = [];
@@ -414,17 +418,17 @@ const endGame = async () => {
 
     await delay(250);
 
-    for (let i = 17; i > -1; i--) {
-        const row = document.getElementById(`y${i}`);
+    const reversedAllRows = allRows.reverse()
 
+    for (let i = 0; i < reversedAllRows.length; i++) {
         for (let j = 9; j > -1; j--) {
-            row.children[j].remove();
+            reversedAllRows[i].children[j].remove();
             await delay(10)
         }
     }
 
-    for (let i = 0; i < 18; i++) {
-        document.getElementById(`y${i}`).remove();
+    for (let i = 0; i < reversedAllRows.length; i++) {
+        reversedAllRows[i].remove();
     }
 
     for (let i = 4; i > -1; i--) {
@@ -579,7 +583,8 @@ document.addEventListener("keydown", (e) => {
     if (key === controlsData.leftMoveKey || key === controlsData.rightMoveKey || key === controlsData.softDropKey || key === controlsData.hardDropKey) {
         const totalRows = activeShape.moveShape(key, true);
 
-        if (key === "ArrowUp") {
+        if (key === controlsData.hardDropKey) {
+            userInput = false
             loopCount = 0
         } else if (incrementLoopCount && loopCount < 4) {
             loopCount++

@@ -1,18 +1,18 @@
 // X goes from 0 - 9
 // Y goes from 0 - 17
 class Box {
-    constructor(x, y, color, shapeId, order) {
+    constructor(x, y, color, shapeId) {
         this.x = x;
         this.y = y;
         this.color = color;
         this.shapeId = shapeId;
-        this.order = order;
     }
 
     updateDom(show, target) {
 
         const row = !target ? document.getElementById(`y${this.y}`) : document.getElementById(`${target}-y${this.y}`);
         const div = row.children[this.x];
+        // What is active used for?
         let classes = [this.color, "active"];
 
         if (show) {
@@ -24,7 +24,8 @@ class Box {
         }
     }
 
-    canBoxMove(targetX, targetY, direction, ignoreShapeId) {
+    // Where do we use ignoreShapeId?
+    canBoxMove(targetX, targetY, direction) {
         let x = this.x;
         let y = this.y;
 
@@ -60,7 +61,7 @@ class Box {
             return true
         } else {
             // Check to see if next location is owned by box within same shape
-            if (targetBox.getAttribute("shapeId") == this.shapeId && !ignoreShapeId) {
+            if (targetBox.getAttribute("shapeId") == this.shapeId) {
                 return true
             } else {
                 return false
@@ -101,45 +102,42 @@ class Shape {
     moveShape(direction, user) {
         let count = 0;
 
-        this.populateShape(false);
+        if (this.canShapeMove(direction)) {
 
-        if (!this.canShapeMove(direction, [])) {
-            this.populateShape(true);
-            return 0;
-        }
+            this.populateShape(false);
 
-        for (let i = 0; i < this.boxes.length; i++) {
-            switch (direction) {
-                case controlsData.leftMoveKey:
-                    this.boxes[i].x--
-                    break;
-                case controlsData.rightMoveKey:
-                    this.boxes[i].x++
-                    break;
-                case controlsData.softDropKey:
-                    this.boxes[i].y++
-                    break;
-                default:
-                    count += this.hardDrop();
-                    break;
+            for (let i = 0; i < this.boxes.length; i++) {
+                switch (direction) {
+                    case controlsData.leftMoveKey:
+                        this.boxes[i].x--
+                        break;
+                    case controlsData.rightMoveKey:
+                        this.boxes[i].x++
+                        break;
+                    case controlsData.softDropKey:
+                        this.boxes[i].y++
+                        break;
+                    default:
+                        count += this.hardDrop();
+                        break;
+                }
             }
+
+
+            this.populateShape(true);
+
+            if (direction === controlsData.hardDropKey) {
+                count = count * 2;
+            } else if (user && direction === controlsData.softDropKey) {
+                count = 1;
+            }
+
         }
 
-
-        this.populateShape(true);
-
-        if (direction === controlsData.hardDropKey) {
-            return count * 2;
-        } else if (user && direction === controlsData.softDropKey) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return count;
     }
 
     rotatePiece(num) {
-
-        this.populateShape(false);
 
         const newPositions = this.getRotatedPositions(num);
         const outOfBounds = newPositions.filter(value => value.x < 0 || value.x > 9 || value.y < 0);
@@ -152,6 +150,7 @@ class Shape {
         }
 
         if (this.canShapeMove("", positions)) {
+            this.populateShape(false);
 
             if (num == 1) {
                 if (this.position == 1) {
@@ -171,9 +170,9 @@ class Shape {
                 this.boxes[i].x = positions[i].x
                 this.boxes[i].y = positions[i].y
             }
-        }
 
-        this.populateShape(true);
+            this.populateShape(true);
+        }
     }
 
     updateShapeId(id) {
@@ -184,6 +183,7 @@ class Shape {
         }
     }
 
+    // Change this to be a property of the extended shape class
     getFocalIndex() {
         if (this.color === "light-blue" || this.color === "blue" || this.color === "magenta" || this.color === "red") {
             return 2
@@ -195,34 +195,21 @@ class Shape {
     wallKick(newPositions) {
         let xPositions = newPositions.map(value => value.x);
         let yPositions = newPositions.map(value => value.y);
-        let kickType;
         let kickedPositions;
 
         // Right Kick
         if (xPositions.some(num => num < 0)) {
-            kickType = "right"
+            kickedPositions = newPositions.map((value) => { return { x: value.x + 1, y: value.y } })
         }
 
         // Left Kick
         if (xPositions.some(num => num > 9)) {
-            kickType = "left"
+            kickedPositions = newPositions.map((value) => { return { x: value.x - 1, y: value.y } })
         }
 
         // Down Kick
         if (yPositions.some(num => num < 0)) {
-            kickType = "down"
-        }
-
-        switch (kickType) {
-            case "right":
-                kickedPositions = newPositions.map((value) => { return { x: value.x + 1, y: value.y } })
-                break;
-            case "left":
-                kickedPositions = newPositions.map((value) => { return { x: value.x - 1, y: value.y } })
-                break;
-            default:
-                kickedPositions = newPositions.map((value) => { return { x: value.x, y: value.y + 1 } })
-                break;
+            kickedPositions = newPositions.map((value) => { return { x: value.x, y: value.y + 1 } })
         }
 
         return kickedPositions
@@ -230,7 +217,7 @@ class Shape {
 
     hardDrop() {
         let iteration = 0;
-        while (this.canShapeMove(controlsData.softDropKey, [])) {
+        while (this.canShapeMove(controlsData.softDropKey)) {
             this.moveShape(controlsData.softDropKey);
             iteration++
         }
