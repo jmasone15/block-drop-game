@@ -78,13 +78,13 @@ const game = async () => {
         }
 
         // Display the next shape in the next sub-grid
-        displayShape(i == 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
+        displayShape(i === 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
 
         // Increment shape counter and use that as the shapeId
         shapeCounter++
         shape.updateShapeId(shapeCounter);
 
-        // Set the current shape to the activeShape global variabel and start the shape drop.
+        // Set the current shape to the activeShape global variable and start the shape drop.
         activeShape = shape;
         await shapeDrop();
 
@@ -642,7 +642,7 @@ controlsEl.addEventListener("click", () => {
     }
 });
 window.addEventListener("click", (e) => {
-    if (e.target == modal) {
+    if (e.target === modal) {
         modal.style.display = "none";
     }
 });

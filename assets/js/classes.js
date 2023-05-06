@@ -24,7 +24,6 @@ class Box {
         }
     }
 
-    // Where do we use ignoreShapeId?
     canBoxMove(targetX, targetY, direction) {
         let x = this.x;
         let y = this.y;
@@ -57,15 +56,11 @@ class Box {
         const targetRow = document.getElementById(`y${y}`);
         const targetBox = targetRow.children[x];
 
-        if (targetBox.classList.length == 0) {
+        if (targetBox.classList.length === 0) {
             return true
         } else {
             // Check to see if next location is owned by box within same shape
-            if (targetBox.getAttribute("shapeId") == this.shapeId) {
-                return true
-            } else {
-                return false
-            }
+            return parseInt(targetBox.getAttribute("shapeId")) === this.shapeId
         }
     }
 }
