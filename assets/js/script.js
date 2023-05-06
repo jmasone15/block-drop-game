@@ -5,6 +5,7 @@ let shapeCounter = 0;
 let allRows = [];
 let shapes = [];
 let score = 0;
+let hardDropped = false;
 let holdPiece;
 let hold = true;
 let hasSwappedHold = false;
@@ -31,6 +32,7 @@ const controlsEl = document.getElementById("controls");
 const controlsBoxEl = document.getElementById("controls-box");
 const modal = document.getElementById("modal");
 
+// If there are no controls saved in localStorage, update to the default values and save in localStorage.
 if (!controlsData) {
     controlsData = {
         leftMoveKey: "ArrowLeft",
@@ -75,13 +77,18 @@ const game = async () => {
             }
         }
 
+        // Display the next shape in the next sub-grid
         displayShape(i == 6 ? nextBag[0].color : currentBag[i + 1].color, "next");
 
+        // Increment shape counter and use that as the shapeId
         shapeCounter++
         shape.updateShapeId(shapeCounter);
+
+        // Set the current shape to the activeShape global variabel and start the shape drop.
         activeShape = shape;
         await shapeDrop();
 
+        // The shapeDrop function will be cancelled if the user presses the hold piece key.
         if (!hold) {
             // Reset Piece
             activeShape.populateShape(false);
@@ -100,6 +107,7 @@ const game = async () => {
             continue;
         }
 
+        hardDropped = false;
         hasSwappedHold = false;
         shapes.push(activeShape);
 
@@ -119,7 +127,7 @@ const shapeDrop = async () => {
     userInput = true;
     loopCount = 1;
 
-    while (hold && activeShape.canShapeMove(controlsData.softDropKey)) {
+    while (hold && activeShape.canShapeMove(controlsData.softDropKey) && !hardDropped) {
 
         // When holding a piece, there is a big delay if the speedMS is too high.
         // Split speedMS into quarters and check the hold after each one.
@@ -127,7 +135,7 @@ const shapeDrop = async () => {
 
         for (let i = 0; i < 4; i++) {
             await delay(quarterSpeed);
-            if (!hold) {
+            if (!hold || hardDropped) {
                 return;
             }
         }
@@ -140,13 +148,12 @@ const shapeDrop = async () => {
     }
 
     // Give users a max of 1000 ms to rotate and move block around once it hits the bottom possible space.
-    // Need to rework this
     let count = 0;
     incrementLoopCount = true;
-    while (count <= loopCount && loopCount !== 0) {
-        await delay(250);
+    while (count <= loopCount && loopCount !== 0 && !hardDropped) {
+        await delay(100);
         if (activeShape.canShapeMove(controlsData.softDropKey)) {
-            if (!hold) {
+            if (!hold || hardDropped) {
                 return;
             }
             return shapeDrop();
@@ -251,15 +258,23 @@ const populateGrid = async () => {
 
 const clearRows = async () => {
     let clearedRows = [];
+    let targetYRows = [];
 
-    for (let i = 0; i < allRows.length; i++) {
-        const childDivs = Array.from(allRows[i].children);
+    for (let i = 0; i < activeShape.boxes.length; i++) {
+        if (!targetYRows.includes(activeShape.boxes[i].y)) {
+            targetYRows.push(activeShape.boxes[i].y)
+        }
+    }
+    
+    for (let i = 0; i < targetYRows.length; i++) {
+        const row = document.getElementById(`y${targetYRows[i]}`);
+        const childDivs = Array.from(row.children);
 
         // If row is full
         // might be better with an every method
         if (childDivs.filter(div => div.classList.length !== 0).length == 10) {
 
-            clearedRows.push(i);
+            clearedRows.push(targetYRows[i]);
 
             // Remove attributes from all blocks
             for (let j = 0; j < childDivs.length; j++) {
@@ -273,9 +288,9 @@ const clearRows = async () => {
 
     // Update every shape on the page to move down but still keep it's form
     if (clearedRows.length > 0) {
-        clearedLinesCount += clearedRows.length;
+        await delay(250);
 
-        await delay(250)
+        clearedLinesCount += clearedRows.length;
 
         shapes.forEach(shape => {
             const filteredBoxes = shape.boxes.filter(box => !clearedRows.includes(box.y));
@@ -338,23 +353,18 @@ const clearRows = async () => {
     }
 }
 
-// Currently really slow, rework this
 const bagGeneration = () => {
     let pieces = [new I(5, 0), new J(5, 0), new L(5, 0), new O(5, 0), new S(5, 0), new T(5, 0), new Z(5, 0)];
-    let bag = [];
 
-    for (let i = 0; i < pieces.length; i++) {
-        let position = Math.floor(Math.random() * 7);
-
-        if (bag.includes(position)) {
-            i--
-            continue;
-        } else {
-            bag.push(position)
-        }
+    // Durstendfeld shuffle
+    for (var i = pieces.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = pieces[i];
+        pieces[i] = pieces[j];
+        pieces[j] = temp;
     }
 
-    return bag.map(x => pieces[x])
+    return pieces
 }
 
 const updateLevel = () => {
@@ -584,9 +594,10 @@ document.addEventListener("keydown", (e) => {
         const totalRows = activeShape.moveShape(key, true);
 
         if (key === controlsData.hardDropKey) {
-            userInput = false
-            loopCount = 0
-        } else if (incrementLoopCount && loopCount < 4) {
+            hardDropped = true;
+            userInput = false;
+            loopCount = 0;
+        } else if (incrementLoopCount && loopCount < 10) {
             loopCount++
         }
 
@@ -603,7 +614,6 @@ document.addEventListener("keydown", (e) => {
         e.preventDefault();
         if (!hasSwappedHold) {
             hold = false;
-            userInput = false;
         }
     }
 });
