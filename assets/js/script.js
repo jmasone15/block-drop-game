@@ -72,6 +72,7 @@ const game = async () => {
             let targetRow = document.getElementById(`y${y}`);
             let targetBox = targetRow.children[x];
 
+            // If there is an obstruction for any box of the spawning shape, end the game.
             if (targetBox.classList.length !== 0) {
                 return endGame();
             }
@@ -94,23 +95,30 @@ const game = async () => {
             activeShape.populateShape(false);
             activeShape.resetShape(5, 0);
 
+            // If the user swapped pieces with the currently held piece,
+            // We don't want to mess with the order of the bag Generation so we decrement i.
             if (holdPiece) {
                 currentBag[i] = holdPiece;
                 i--;
             }
 
+            // Update the game variables.
             holdPiece = activeShape;
-            displayShape(activeShape.color, "hold");
             hold = true;
             hasSwappedHold = true;
+
+            // Display the held shape on the UI
+            displayShape(activeShape.color, "hold");
 
             continue;
         }
 
+        // Update the game variables.
         hardDropped = false;
         hasSwappedHold = false;
         shapes.push(activeShape);
 
+        // Check to see if any rows have been cleared and update the UI accordingly.
         await clearRows();
 
         // Last iteration requery bag generation.
@@ -123,10 +131,13 @@ const game = async () => {
 }
 
 const shapeDrop = async () => {
+    // Update the game variables
     activeShape.populateShape(true);
     userInput = true;
     loopCount = 1;
 
+    // System should consitently drop the activeShape at a rate determined by the current game level.
+    // System should stop dropping the piece once it hits a blocker, the user hard drops, or the user decides to hold the piece.
     while (hold && activeShape.canShapeMove(controlsData.softDropKey) && !hardDropped) {
 
         // When holding a piece, there is a big delay if the speedMS is too high.
@@ -148,6 +159,7 @@ const shapeDrop = async () => {
     }
 
     // Give users a max of 1000 ms to rotate and move block around once it hits the bottom possible space.
+    // Needs some rework
     let count = 0;
     incrementLoopCount = true;
     while (count <= loopCount && loopCount !== 0 && !hardDropped) {
@@ -161,16 +173,17 @@ const shapeDrop = async () => {
         count++
     }
 
-    // Set the shape to the focal point
-    // Change this to be a method for each shape
+    // Update Game Variables
     userInput = false;
     incrementLoopCount = false;
-    let focalBoxIndex = activeShape.getFocalIndex();
 
+    // Update shape's focalBox x and y coordinates.
+    let focalBoxIndex = activeShape.getFocalIndex();
     activeShape.x = activeShape.boxes[focalBoxIndex].x
     activeShape.y = activeShape.boxes[focalBoxIndex].y
 }
 
+// Function for displaying a particular shape one of the side boxes.
 const displayShape = (color, target) => {
     for (let i = 0; i < 5; i++) {
         const section = document.getElementById(`${target}-y${i}`);
@@ -209,6 +222,8 @@ const displayShape = (color, target) => {
     shape.populateShape(true, target)
 }
 
+// Instead of coding 180 individual divs, figured it would look cool to populate them incrementally to simulate "loading up" on the old systems.
+// Creates rows and divs for the game grid with a 10 ms delay between each to simulate loading effect.
 const populateGrid = async () => {
 
     await delay(250);
@@ -256,78 +271,80 @@ const populateGrid = async () => {
     allRows = [...document.getElementsByTagName("section")]
 }
 
+// Function to handle the clearing of rows when a piece is placed.
 const clearRows = async () => {
     let clearedRows = [];
     let targetYRows = [];
 
-    for (let i = 0; i < activeShape.boxes.length; i++) {
-        if (!targetYRows.includes(activeShape.boxes[i].y)) {
-            targetYRows.push(activeShape.boxes[i].y)
-        }
-    }
-    
-    for (let i = 0; i < targetYRows.length; i++) {
-        const row = document.getElementById(`y${targetYRows[i]}`);
-        const childDivs = Array.from(row.children);
+    // Grab the unique y values from the activeShape's boxes.
+    // Check to see if a row was cleared by any of those boxesx.
+    activeShape.boxes.forEach(box => {
+        // Only check unique rows.
+        if (!targetYRows.includes(box.y)) {
+            const targetY = box.y;
 
-        // If row is full
-        // might be better with an every method
-        if (childDivs.filter(div => div.classList.length !== 0).length == 10) {
+            const row = document.getElementById(`y${targetY}`);
+            const childDivs = [...row.children];
 
-            clearedRows.push(targetYRows[i]);
+            // If row is completely full...
+            if (childDivs.every(div => div.classList.length !== 0)) {
 
-            // Remove attributes from all blocks
-            for (let j = 0; j < childDivs.length; j++) {
+                // Update the array variables.
+                clearedRows.push(targetY);
+                targetYRows.push(targetY);
 
-                childDivs[j].removeAttribute("class");
-                childDivs[j].removeAttribute("shapeid");
+                // Clear all divs within row.
+                childDivs.forEach(div => {
+                    div.removeAttribute("class");
+                    div.removeAttribute("shapeid");
+                });
 
             }
         }
-    }
+    });
 
     // Update every shape on the page to move down but still keep it's form
     if (clearedRows.length > 0) {
         await delay(250);
 
-        clearedLinesCount += clearedRows.length;
-
+        // Filter out shapes that have had all of their boxes deleted.
+        // Update remaining shapes with remaining boxes.
+        let filteredShapes = [];
         shapes.forEach(shape => {
             const filteredBoxes = shape.boxes.filter(box => !clearedRows.includes(box.y));
-            shape.boxes = filteredBoxes
+
+            if (filteredBoxes.length !== 0) {
+                shape.boxes = filteredBoxes
+                filteredShapes.push(shape);
+            }
         });
-
-        const filteredShapes = shapes.filter(shape => {
-            return shape.boxes.length !== 0
-        });
-
-        shapes = filteredShapes
-
+        shapes = filteredShapes;
 
         // Loop over all rows in reverse order (except the bottom one)
         for (let i = 16; i > -1; i--) {
-            // If the row loop is a cleared row, skip.
-            if (clearedRows.includes(i)) {
-                continue
-            } else {
-                // For each box on the board, we want to drop it the appropriate amount based on lines cleared.
+
+            // If the row loop is not a cleared row...
+            if (!clearedRows.includes(i)) {
+                // For each box on the board, we want to drop it the appropriate amount based on lines cleared below it.
                 shapes.forEach(({ boxes }) => {
                     boxes.forEach((box) => {
                         if (box.y == i) {
-                            // Drop the box based on how many lines were cleared below it.
-                            let dropAmount = clearedRows.filter(num => num > i).length;
 
+                            // Drop the box based on how many lines were cleared below it.
                             box.updateDom(false);
-                            box.y += dropAmount;
+                            box.y += clearedRows.filter(num => num > i).length;
                             box.updateDom(true);
+
                         }
                     });
                 });
             }
+
         }
 
+        // Update score based on number of lines cleared
         let modifier = 0;
-        let levelMod = level;
+        let levelMod = level == 0 ? 1 : level;
         switch (clearedRows.length) {
             case 4:
                 modifier = 800
@@ -343,13 +360,13 @@ const clearRows = async () => {
                 break;
         }
 
-        if (level == 0) {
-            levelMod = 1
-        }
-
+        // Update the game variables
+        clearedLinesCount += clearedRows.length;
         score += modifier * levelMod;
-        scoreEl.textContent = `Score: ${score}`
-        updateLevel();
+        scoreEl.textContent = `Score: ${score}`;
+
+        // Update the game level based on rows cleared
+        return updateLevel();
     }
 }
 
@@ -373,6 +390,10 @@ const updateLevel = () => {
     if (clearedLinesCount >= lineTarget) {
         level++
 
+        // To calculate the milliseconds between piece auto-drop, there was some calculations I did on my end to keep it accurate to the original system.
+        // Per the Tetris wikipedia, piece drop speed is determined by how many frames between piece drop (level 1 is 48 frames).
+        // To translate this into seconds, I took the frame drop amount and divided it by the frame rate of the original NES system (60 fps).
+        // So to determine any level's drop speed, dropSpeed = Math.ceil(frameDrop / 60)
         switch (level) {
             case 1:
                 speedMS = 800;

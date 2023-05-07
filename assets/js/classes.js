@@ -12,14 +12,12 @@ class Box {
 
         const row = !target ? document.getElementById(`y${this.y}`) : document.getElementById(`${target}-y${this.y}`);
         const div = row.children[this.x];
-        // What is active used for?
-        let classes = [this.color, "active"];
 
         if (show) {
-            div.classList.add(...classes);
+            div.classList.add(this.color);
             div.setAttribute("shapeId", this.shapeId);
         } else {
-            div.classList.remove(...classes);
+            div.classList.remove(this.color);
             div.removeAttribute("shapeId");
         }
     }
