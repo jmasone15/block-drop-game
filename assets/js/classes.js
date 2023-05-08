@@ -1,5 +1,5 @@
-// X goes from 0 - 9
-// Y goes from 0 - 17
+// X goes from 0 to 9
+// Y goes from 0 to 17
 class Box {
     constructor(x, y, color, shapeId) {
         this.x = x;
@@ -89,7 +89,7 @@ class Shape {
             boxesCanMove = this.boxes.filter(x => x.canBoxMove(null, null, direction));
         }
 
-        return boxesCanMove.length == this.boxes.length
+        return boxesCanMove.length === this.boxes.length
     }
 
     moveShape(direction, user) {
@@ -145,14 +145,14 @@ class Shape {
         if (this.canShapeMove("", positions)) {
             this.populateShape(false);
 
-            if (num == 1) {
-                if (this.position == 1) {
+            if (num === 1) {
+                if (this.position === 1) {
                     this.position = 4
                 } else {
                     this.position--
                 }
             } else {
-                if (this.position == 4) {
+                if (this.position === 4) {
                     this.position = 1
                 } else {
                     this.position++
@@ -238,7 +238,7 @@ class I extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.x++
@@ -388,7 +388,7 @@ class J extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.y += 2
@@ -521,7 +521,7 @@ class L extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.x++
@@ -649,7 +649,7 @@ class O extends Shape {
         ]
     }
 
-    getRotatedPositions(num) {
+    getRotatedPositions() {
         let box0 = { x: this.boxes[0].x, y: this.boxes[0].y };
         let box1 = { x: this.boxes[1].x, y: this.boxes[1].y };
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
@@ -695,7 +695,7 @@ class S extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.x++
@@ -829,7 +829,7 @@ class T extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.x++
@@ -963,7 +963,7 @@ class Z extends Shape {
         let box2 = { x: this.boxes[2].x, y: this.boxes[2].y };
         let box3 = { x: this.boxes[3].x, y: this.boxes[3].y };
 
-        if (num == 1) {
+        if (num === 1) {
             switch (this.position) {
                 case 1:
                     box0.y += 2

@@ -96,7 +96,7 @@ const game = async () => {
             activeShape.resetShape(5, 0);
 
             // If the user swapped pieces with the currently held piece,
-            // We don't want to mess with the order of the bag Generation so we decrement i.
+            // We don't want to mess with the order of the bag Generation, so we decrement i.
             if (holdPiece) {
                 currentBag[i] = holdPiece;
                 i--;
@@ -121,8 +121,8 @@ const game = async () => {
         // Check to see if any rows have been cleared and update the UI accordingly.
         await clearRows();
 
-        // Last iteration requery bag generation.
-        if (i == 6) {
+        // Last iteration re-query bag generation.
+        if (i === 6) {
             currentBag = nextBag;
             nextBag = bagGeneration();
             i = -1;
@@ -136,7 +136,7 @@ const shapeDrop = async () => {
     userInput = true;
     loopCount = 1;
 
-    // System should consitently drop the activeShape at a rate determined by the current game level.
+    // System should consistently drop the activeShape at a rate determined by the current game level.
     // System should stop dropping the piece once it hits a blocker, the user hard drops, or the user decides to hold the piece.
     while (hold && activeShape.canShapeMove(controlsData.softDropKey) && !hardDropped) {
 
@@ -277,7 +277,7 @@ const clearRows = async () => {
     let targetYRows = [];
 
     // Grab the unique y values from the activeShape's boxes.
-    // Check to see if a row was cleared by any of those boxesx.
+    // Check to see if a row was cleared by any of those boxes.
     activeShape.boxes.forEach(box => {
         // Only check unique rows.
         if (!targetYRows.includes(box.y)) {
@@ -296,14 +296,14 @@ const clearRows = async () => {
                 // Clear all divs within row.
                 childDivs.forEach(div => {
                     div.removeAttribute("class");
-                    div.removeAttribute("shapeid");
+                    div.removeAttribute("shapeId");
                 });
 
             }
         }
     });
 
-    // Update every shape on the page to move down but still keep it's form
+    // Update every shape on the page to move down but still keep its form
     if (clearedRows.length > 0) {
         await delay(250);
 
@@ -328,7 +328,7 @@ const clearRows = async () => {
                 // For each box on the board, we want to drop it the appropriate amount based on lines cleared below it.
                 shapes.forEach(({ boxes }) => {
                     boxes.forEach((box) => {
-                        if (box.y == i) {
+                        if (box.y === i) {
 
                             // Drop the box based on how many lines were cleared below it.
                             box.updateDom(false);
@@ -343,26 +343,26 @@ const clearRows = async () => {
         }
 
         // Update score based on number of lines cleared
-        let modifier = 0;
-        let levelMod = level == 0 ? 1 : level;
+        let mod;
+        let levelMod = level === 0 ? 1 : level;
         switch (clearedRows.length) {
             case 4:
-                modifier = 800
+                mod = 800
                 break;
             case 3:
-                modifier = 500
+                mod = 500
                 break;
             case 2:
-                modifier = 300
+                mod = 300
                 break;
             default:
-                modifier = 100
+                mod = 100
                 break;
         }
 
         // Update the game variables
         clearedLinesCount += clearedRows.length;
-        score += modifier * levelMod;
+        score += mod * levelMod;
         scoreEl.textContent = `Score: ${score}`;
 
         // Update the game level based on rows cleared
@@ -374,9 +374,9 @@ const bagGeneration = () => {
     let pieces = [new I(5, 0), new J(5, 0), new L(5, 0), new O(5, 0), new S(5, 0), new T(5, 0), new Z(5, 0)];
 
     // Durstendfeld shuffle
-    for (var i = pieces.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = pieces[i];
+    for (let i = pieces.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = pieces[i];
         pieces[i] = pieces[j];
         pieces[j] = temp;
     }
@@ -385,12 +385,12 @@ const bagGeneration = () => {
 }
 
 const updateLevel = () => {
-    const lineTarget = Math.min(100, (level * 1) + 1);
+    const lineTarget = Math.min(100, (level * 10) + 1);
 
     if (clearedLinesCount >= lineTarget) {
         level++
 
-        // To calculate the milliseconds between piece auto-drop, there was some calculations I did on my end to keep it accurate to the original system.
+        // To calculate the milliseconds between piece auto-drop, there were some calculations I did on my end to keep it accurate to the original system.
         // Per the Tetris wikipedia, piece drop speed is determined by how many frames between piece drop (level 1 is 48 frames).
         // To translate this into seconds, I took the frame drop amount and divided it by the frame rate of the original NES system (60 fps).
         // So to determine any level's drop speed, dropSpeed = Math.ceil(frameDrop / 60)
@@ -440,8 +440,6 @@ const updateLevel = () => {
 
         levelEl.textContent = `Level: ${level}`
     }
-
-    return;
 }
 
 const endGame = async () => {
@@ -627,9 +625,9 @@ document.addEventListener("keydown", (e) => {
             scoreEl.textContent = `Score: ${score}`
         }
 
-    } else if (key == controlsData.leftRotateKey) {
+    } else if (key === controlsData.leftRotateKey) {
         activeShape.rotatePiece(1);
-    } else if (key == controlsData.rightRotateKey) {
+    } else if (key === controlsData.rightRotateKey) {
         activeShape.rotatePiece(2);
     } else if (key === controlsData.holdPieceKey) {
         e.preventDefault();
@@ -643,7 +641,8 @@ startBtnEl.addEventListener("click", () => {
     h3El.removeAttribute("class");
     startBtnEl.setAttribute("class", "display-none");
     controlsEl.setAttribute("class", "display-none");
-    init();
+
+    return init();
 });
 controlsEl.addEventListener("click", () => {
     if (changeControls) {
