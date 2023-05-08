@@ -74,6 +74,7 @@ const game = async () => {
 
             // If there is an obstruction for any box of the spawning shape, end the game.
             if (targetBox.classList.length !== 0) {
+                userInput = false;
                 return endGame();
             }
         }
@@ -443,23 +444,20 @@ const updateLevel = () => {
 }
 
 const endGame = async () => {
-    userInput = false;
-
     await delay(250);
 
+    // We want to delete all the rows incrementally, similar to how we populated boxes and rows one at a time.
+    // Remove divs from rows in reverse order and then remove the rows once they are empty to not mess with UI.
     const reversedAllRows = allRows.reverse()
-
     for (let i = 0; i < reversedAllRows.length; i++) {
         for (let j = 9; j > -1; j--) {
             reversedAllRows[i].children[j].remove();
             await delay(10)
         }
-    }
-
-    for (let i = 0; i < reversedAllRows.length; i++) {
         reversedAllRows[i].remove();
     }
 
+    // Remove elements from small side grids.
     for (let i = 4; i > -1; i--) {
         const rowOne = document.getElementById(`next-y${i}`);
         const rowTwo = document.getElementById(`hold-y${i}`);
@@ -473,20 +471,21 @@ const endGame = async () => {
         rowTwo.remove();
     }
 
-    await delay(250);
-
+    // Add game over elements to the screen
     const gameOverElements = [document.createElement("h1"), document.createElement("p"), document.createElement("button")];
-
     gameOverElements[0].textContent = "Game Over!";
     gameOverElements[1].textContent = `Final Score: ${score}`;
     gameOverElements[2].textContent = "Play Again?";
 
     gameOverElements[2].addEventListener("click", () => {
+        // Hide game over elements
         gameBoxEl.removeAttribute("class");
         for (let i = 0; i < gameOverElements.length; i++) {
             gameBoxEl.removeChild(gameOverElements[i]);
         }
 
+
+        // Reset Game Variables
         shapes = [];
         shapeCounter = 0;
         score = 0;
@@ -595,44 +594,49 @@ const changeControlKey = (event) => {
 }
 
 document.addEventListener("keydown", (e) => {
-    let key = e.key === " " ? "Space" : e.key;
+    e.preventDefault();
 
+
+    // Key the user pressed
+    let key = e.key === " " ? "Space" : e.key;
+    let { leftMoveKey, rightMoveKey, softDropKey, hardDropKey, leftRotateKey, rightRotateKey, holdPieceKey } = controlsData;
+
+    // If modal is being shown, update the control key the user is trying to change and hide the modal.
     if (modal.style.display === "block") {
-        e.preventDefault();
         controlsData[targetControlChange] = key;
         document.getElementById(targetControlChange).textContent = key;
         localStorage.setItem("blockGameControls", JSON.stringify(controlsData));
         modal.style.display = "none";
     }
 
-    if (!userInput) {
-        return
-    }
+    if (userInput) {
+        if ([leftMoveKey, rightMoveKey, softDropKey, hardDropKey].includes(key)) {
+            // Need count of rows for updating score.
+            const totalRows = activeShape.moveShape(key, true);
 
-    if (key === controlsData.leftMoveKey || key === controlsData.rightMoveKey || key === controlsData.softDropKey || key === controlsData.hardDropKey) {
-        const totalRows = activeShape.moveShape(key, true);
+            // Hard drop has some special features.
+            if (key === hardDropKey) {
+                hardDropped = true;
+                userInput = false;
+                loopCount = 0;
+            } else if (incrementLoopCount && loopCount < 10) {
+                loopCount++
+            }
 
-        if (key === controlsData.hardDropKey) {
-            hardDropped = true;
-            userInput = false;
-            loopCount = 0;
-        } else if (incrementLoopCount && loopCount < 10) {
-            loopCount++
-        }
+            // Increment score
+            if (totalRows !== 0) {
+                score += totalRows
+                scoreEl.textContent = `Score: ${score}`
+            }
 
-        if (totalRows !== 0) {
-            score += totalRows
-            scoreEl.textContent = `Score: ${score}`
-        }
-
-    } else if (key === controlsData.leftRotateKey) {
-        activeShape.rotatePiece(1);
-    } else if (key === controlsData.rightRotateKey) {
-        activeShape.rotatePiece(2);
-    } else if (key === controlsData.holdPieceKey) {
-        e.preventDefault();
-        if (!hasSwappedHold) {
-            hold = false;
+        } else if ([leftRotateKey, rightRotateKey].includes(key)) {
+            // Rotate piece
+            activeShape.rotatePiece(key === leftRotateKey ? 1 : 2);
+        } else if (key === holdPieceKey) {
+            // Hold piece
+            if (!hasSwappedHold) {
+                hold = false;
+            }
         }
     }
 });
